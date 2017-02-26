@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{margin: 0;padding: 0;}
+			#message{
+				font-size: 30px;
+			}
+			#bdmap{
+				width: 800px;
+				height: 500px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="message"></div>
+		<div id="bdmap"></div>
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6agimRGtYkZTbusZKNRPGBxw"></script>
+		<script type="text/javascript">
+			var oMsg = document.getElementById("message");
+			var oMap = document.getElementById("bdmap");
+			if(navigator.geolocation){
+				navigator.geolocation.getCurrentPosition(function(position){
+					oMsg.innerHTML = "经度："+position.coords.longitude+"<br>"
+					+"纬度："+position.coords.latitude+"<br>"
+					+"精确度："+position.coords.accuracy+"<br>"
+					+"海拔："+position.coords.altitude+"<br>"
+					+"海拔准确度："+position.coords.altitudeAccuracy+"<br>"
+					+"行进方向："+position.coords.heading+"<br>"
+					+"速度："+position.coords.speed+"<br>"
+					+"时间戳："+new Date(position.timestamp);
+					var map = new BMap.Map("bdmap");
+					var point = new BMap.Point(position.coords.longitude,position.coords.latitude);
+					map.centerAndZoom(point,20);
+					var marker = new BMap.Marker(point);
+					map.addOverlay(marker);
+					map.addControl(new BMap.NavigationControl());    
+					map.addControl(new BMap.ScaleControl());    
+					map.addControl(new BMap.OverviewMapControl());    
+					map.addControl(new BMap.MapTypeControl());
+//					var local = new BMap.LocalSearch(map, {      
+//					      renderOptions:{map: map}      
+//					});      
+//					local.search("郑东商业中心");
+				},function(error){
+					switch(error.code){
+						case(0):oMsg.innerHTML = "未知错误！请重试！";break;
+						case(1):oMsg.innerHTML = "访问位置信息被拒绝！";break;
+						case(2):oMsg.innerHTML = "获取用户信息被拒绝！";break;
+						case(3):oMsg.innerHTML = "获取位置信息超时，请重试！";break;
+					}
+				},{
+					enableHighAccuracy:true,
+					timeout:3000,
+					maximumAge:1000*30
+				});
+			}else{
+				oMsg.innerHTML = ("设备不支持定位！");
+			}
+		</script>
+	</body>
+</html>

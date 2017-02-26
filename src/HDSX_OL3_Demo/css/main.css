@@ -1,0 +1,25 @@
+.container{
+  width: 100%;
+  margin-top: 20px;
+}
+.container .container{
+  width: 480px;
+  margin: 0 auto;
+}
+.map{
+  width: 800px; height: 640px;
+  margin: 10px auto;
+  border: 1px solid #2e2e2e;
+}
+.ol-ZoomSlider {
+  position: absolute;
+  background: transparent;
+  top: 3em;
+  height: 194px;
+}
+.HDMap_stdMpZoom{
+  height: 160px!important;
+}
+.draw{
+  margin-top: 15px!important;
+}

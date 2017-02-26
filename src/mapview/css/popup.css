@@ -1,0 +1,73 @@
+.ol-popup {
+    display: none;
+    position: absolute;
+    background-color: white;
+    -moz-box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+    border: 1px solid #cccccc;
+    bottom: 12px;
+    left: -50px;
+    width: 500px;
+}
+.ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+.ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+.popup-title{
+    padding: 5px 12px;
+    background: #22bfd6;
+    color:#ffffff;
+}
+.popup-content{
+    padding: 5px 8px;
+}
+.ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    right: 6px;
+    top: 2px;
+    color:#ffffff;
+}
+.ol-popup-closer:hover{
+    color:	#FF4500;
+}
+.ol-popup-closer:after {
+    content: "✖";
+}
+.popup-content table{
+    width: 480px;
+    border-collapse: collapse;
+}
+.popup-content table tr{
+    height: 34px;
+    line-height: 34px;
+    border:1px solid #ebf7f9;
+}
+.popup-content table tr th,
+.popup-content table tr td{
+    font-size: 14px;
+    font-weight: 200;
+    text-align: center;
+    border-right:1px solid #ebf7f9;
+}
+.popup-content table tr th{
+    background: #fcfefe;
+}

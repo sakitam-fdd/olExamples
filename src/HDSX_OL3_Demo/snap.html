@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>自动吸附</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!--引入bootstrap，jQuery，ol3ku-->
+  <link rel="stylesheet" href="../hdsx/public/map/ol.css">
+  <script type="text/javascript" src="../hdsx/public/jquery-2.0.3.js"></script>
+  <script type="text/javascript" src="../hdsx/public/map/ol-debug.js"></script>
+  <style>
+    .tooltip{
+      font-family: "微软雅黑", sans-serif;
+      font-size: 12px;
+      border: 1px solid rgba(0,0,0,0.5);
+      border-radius:4px;
+    }
+  </style>
+</head>
+<body>
+<div id="map" class="map"></div>
+<script type="text/javascript">
+  var layerTitle = "http://171.34.40.68:6080/arcgis/rest/services/JXMAP_2016/MapServer";
+  var Linedata;
+  $.ajax({
+    url: "json/luxian.json",
+    type: "GET",
+    dataType: 'json',
+    success: function (data) {
+      Linedata = data.data["features"];
+    }
+  })
+  $.ajax({
+    url: layerTitle + "?f=pjson",
+    type: "GET",
+    dataType: 'jsonp',
+    jsonp: 'callback',
+    success: function (data) {
+      console.log(data.fullExtent.xmin);
+      var fullExtent = [data.fullExtent.xmin, data.fullExtent.ymin, data.fullExtent.xmax, data.fullExtent.ymax];//获得地图范围
+      var projection = ol.proj.get("EPSG:" + data.spatialReference.wkid);//获得投影对象？
+      projection.setExtent(fullExtent);//设置可见范围
+      var resolutions = [];
+      var origin = [data.tileInfo.origin.x, data.tileInfo.origin.y];
+      var len = data.tileInfo.lods.length;
+
+      for (var i = 0; i < len; i++) {
+        resolutions.push(data.tileInfo.lods[i].resolution);
+      }
+      var tileGrid = new ol.tilegrid.TileGrid({
+        tileSize: data.tileInfo.cols,
+        origin: origin,
+        extent: fullExtent,
+        resolutions: resolutions
+      });
+      var urlTemplate = layerTitle + "/tile/{z}/{y}/{x}";
+      var tileArcGISXYZ = new ol.source.XYZ({//XYZ 格式的切片数据，继承自 ol.source.TileImage
+        wrapX: false,//是否包含世界地图，默认true
+        tileGrid: tileGrid,//瓦片网格
+        projection: projection,//地图投影映射
+        tileUrlFunction: function (tileCoord) {//获得给定一个瓦片地图URL坐标和投影
+          var url = urlTemplate.replace('{z}', (tileCoord[0]).toString())
+            .replace('{x}', tileCoord[1].toString())
+            .replace('{y}', (-tileCoord[2] - 1).toString());
+          return url;
+        }
+      });
+      var baseLayer = new ol.layer.Tile({//基本图层：二维，影像，DOM
+        isBaseLayer: true,//通用基本图层
+        isCurrentBaseLayer: true,//当前通用基本图层
+        source: tileArcGISXYZ,
+        extent: fullExtent
+      });
+      var center=[115.92466595234826, 27.428038204473552];//江西省
+      var scaleLineControl = new ol.control.ScaleLine();//创建一个比例尺
+
+      /***********创建临时图层************/
+      var source = new ol.source.Vector();//创建向量数据图层
+      var vector = new ol.layer.Vector({
+        source: source,
+        style: new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: 'rgba(255, 255, 255, 0.2)'
+          }),
+          stroke: new ol.style.Stroke({
+            color: 'rgba(255, 0, 0, 0.7)',
+            width: 2
+          }),
+          image: new ol.style.Circle({
+            radius: 4,
+            stroke: new ol.style.Stroke({
+              color: 'rgba(255,0,0,1)',
+              width: 1
+            }),
+            fill: new ol.style.Fill({
+              color: 'rgba(255,255,255,0)'
+            })
+          })
+        })
+      });
+      /***************创建地图容器****************/
+      var map = new ol.Map({
+        target: 'map',
+        controls: ol.control.defaults({
+          attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+            collapsible: false
+          })
+        }).extend([
+          scaleLineControl
+        ]),
+        interactions: ol.interaction.defaults({doubleClickZoom: false}),
+        layers: [baseLayer,vector],    //必须定义
+        view: new ol.View({
+          center: ol.proj.fromLonLat(center, projection),//从经度/纬度坐标转换到一个不同的投影,pro:目标投射
+          zoom: 1,//目标缩放
+          projection: projection,//设置地图投影
+          extent: fullExtent,//设置地图范围
+          maxResolution: resolutions[0],//最大分辨率
+          minResolution: resolutions[len - 1]//最小分辨率
+        })
+      });
+      /***************添加线要素***************/
+      var style = {width: 4, color: '#0000EE'};
+      var lineStyle = new ol.style.Style({
+        stroke: new ol.style.Stroke(style)
+      });
+      for (var i = 0; i < Linedata.length; i++) {
+        var _feat = Linedata[i];
+        if (_feat.geometry == undefined || _feat.geometry == null) {
+          continue;
+        }
+        var linefeature = new ol.Feature({
+          geometry: new ol.format.WKT().readGeometry(_feat.geometry)
+        });
+        linefeature.setStyle(lineStyle);
+        vector.getSource().addFeature(linefeature);
+      };
+      /*
+      * 创建吸附要素
+      * */
+      /*var Modify = {
+        init: function() {
+          this.select = new ol.interaction.Select();//选择交互
+          map.addInteraction(this.select);
+
+          this.modify = new ol.interaction.Modify({//修改交互
+            features: this.select.getFeatures()
+          });
+          map.addInteraction(this.modify);
+
+          this.setEvents();
+        },
+        setEvents: function() {
+          var selectedFeatures = this.select.getFeatures();
+
+          this.select.on('change:active', function() {
+            selectedFeatures.forEach(selectedFeatures.remove, selectedFeatures);
+          });
+        },
+        setActive: function(active) {
+          this.select.setActive(active);
+          this.modify.setActive(active);
+        }
+      };
+      Modify.init();
+      var snap = new ol.interaction.Snap({
+        pixelTolerance: 40,//捕捉发生的距离，像素数
+        source: vector.getSource()
+      });
+      map.addInteraction(snap);*/
+      //
+      var point = null;
+      var line = null;
+      var displaySnap = function(coordinate) {
+        var closestFeature = vector.getSource().getClosestFeatureToCoordinate(coordinate);//得到离坐标最近的层源
+        var info = document.getElementById('info');
+        if (closestFeature === null) {
+          point = null;
+          line = null;
+          /*info.innerHTML = '&nbsp;';*/
+        } else {
+          var geometry = closestFeature.getGeometry();
+          var closestPoint = geometry.getClosestPoint(coordinate);//得到离坐标最近的点要素
+          if (point === null) {
+            point = new ol.geom.Point(closestPoint);
+          } else {
+            point.setCoordinates(closestPoint);
+          }
+          var date = new Date(closestPoint[2] * 1000);
+          /*info.innerHTML =
+            closestFeature.get('PLT') + ' (' + date.toUTCString() + ')';*/
+          var coordinates = [coordinate, [closestPoint[0], closestPoint[1]]];
+          if (line === null) {
+            line = new ol.geom.LineString(coordinates);
+          } else {
+            line.setCoordinates(coordinates);
+          }
+        }
+        map.render();
+      };
+
+      map.on('pointermove', function(evt) {
+        if (evt.dragging) {
+          return;
+        }
+        var coordinate = map.getEventCoordinate(evt.originalEvent);
+        displaySnap(coordinate);
+      });
+      var stroke = new ol.style.Stroke({
+        color: 'rgba(255,0,0,0.9)',
+        width: 1
+      });
+      var style = new ol.style.Style({
+        stroke: stroke,
+        image: new ol.style.Circle({
+          radius: 5,
+          fill: null,
+          stroke: stroke
+        })
+      });
+      map.on('postcompose', function(evt) {
+        var vectorContext = evt.vectorContext;
+        vectorContext.setStyle(style);
+        if (point !== null) {
+          vectorContext.drawGeometry(point);
+        }
+        if (line !== null) {
+          vectorContext.drawGeometry(line);
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>

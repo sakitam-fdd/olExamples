@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../public/map/ol.css">
+    <script type="text/javascript" src="../public/map/ol.js"></script>
+    <style type="text/css">
+        #map {
+            width: 640px;
+            height: 475px;
+            border: 1px solid black;
+        }
+
+        .olControlPanel div {
+            display:block;
+            position: absolute;
+            top: 0px;
+            left: 190px;
+            width:  60px;
+            height: 23px;
+            margin: 5px;
+        }
+        .olControlPanel .olControlMouseDefaultsItemActive {
+            background-image: url("/openlayers/img/Pan.gif");
+        }
+        .olControlPanel .olControlMouseDefaultsItemInactive {
+            background-image: url("/openlayers/img/PanSelected.gif");
+        }
+        .olControlPanel .olControlZoomBoxItemInactive {
+            width:  60px;
+            height: 23px;
+            position: absolute;
+            top: 0px;
+            left: 250px;
+            background-image: url("/openlayers/img/ZoomInSelected.gif");
+        }
+        .olControlPanel .olControlZoomBoxItemActive {
+            width:  60px;
+            height: 23px;
+            position: absolute;
+            top: 0px;
+            left: 250px;
+            background-image: url("/openlayers/img/ZoomIn.gif");
+        }
+        .olControlPanel .olControlSelectFeatureItemInactive {
+            width:  60px;
+            height: 23px;
+            position: absolute;
+            top: 0px;
+            left: 310px;
+            background-image: url("/openlayers/img/InfoSelected.gif");
+        }
+        .olControlPanel .olControlSelectFeatureItemActive {
+            width:  60px;
+            height: 23px;
+            position: absolute;
+            top: 0px;
+            left: 310px;
+            background-image: url("/openlayers/img/Info.gif");
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="/openlayers/OpenLayers.js"></script>
+<script type="text/javascript">
+    <!--
+    //定义全局变量
+    var map, layer, selectControl, selectedFeature;
+    //关闭弹出窗口的函数
+    function onPopupClose(evt) {
+        selectControl.unselect(selectedFeature);
+    }
+    //构造弹出窗口的函数
+    function onFeatureSelect(feature) {
+        selectedFeature = feature;
+        popup = new OpenLayers.Popup.Anchored("chicken",
+                feature.geometry.getBounds().getCenterLonLat(),
+                new OpenLayers.Size(250,75),
+                "<div style='font-size:.8em'>" + feature.attributes['cq:LNAME'] +"</div>",
+                null, true, onPopupClose);
+        feature.popup = popup;
+        map.addPopup(popup);
+    }
+    //销毁弹出窗口的函数
+    function onFeatureUnselect(feature) {
+        map.removePopup(feature.popup);
+        feature.popup.destroy();
+        feature.popup = null;
+    }
+    //地图和页面加载函数
+    function init(){
+        //设置地图缩放范围和缩放等级，0级比例尺最小
+        map = new OpenLayers.Map( $('map'), {  maxScale: 500, minScale: 500000, numZoomLevels: 5 });
+        //加载行政区图层，WMS栅格图像
+        layer = new OpenLayers.Layer.WMS( "District",
+                "http://192.98.151.17:8081/geoserver/wms", {layers: 'cq:GMAP_DISTRICT'} );
+        map.addLayer(layer);
+        //加载水系图层，WMS栅格图像
+        layer = new OpenLayers.Layer.WMS( "Water",
+                "http://192.98.151.17:8081/geoserver/wms", {layers: 'cq:GMAP_LAKE', 'transparent': true, format: 'image/png' } );
+        map.addLayer(layer);
+        //加载单位图层，WFS矢量数据，由openlayers在客户端绘制，注意：数量太多会导致速度缓慢
+        layer = new OpenLayers.Layer.WFS( "Unit",
+                "http://192.98.151.17:8081/geoserver/wfs", {typename: 'cq:GPOI_GOV'},
+                {
+                    typename: 'unit',
+                    featureNS: 'http://www.openplans.org/cq',
+                    extractAttributes: true,
+                    maxfeatures: 10,
+                    textAttrToDisplay: 'lname'
+                } );
+        map.addLayer(layer);
+        //在地图上添加按钮和工具条
+        zb = new OpenLayers.Control.ZoomBox();
+        var panel = new OpenLayers.Control.Panel({defaultControl: zb});
+        selectControl = new OpenLayers.Control.SelectFeature(layer, {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect, hover: true});
+        panel.addControls([
+            new OpenLayers.Control.MouseDefaults(), zb, selectControl
+        ]);
+        map.addControl(panel);
+
+        map.addControl(new OpenLayers.Control.PanZoomBar({zoomWorldIcon:false}));
+        map.addControl(new OpenLayers.Control.LayerSwitcher({'ascending':false}));
+        map.addControl(new OpenLayers.Control.MousePosition());
+        //设置初始地图的中心坐标和缩放等级
+        map.setCenter(new OpenLayers.LonLat(106.5, 29.5), 3);
+
+    }
+    // -->
+</script><body onload="init()">
+<h1>OpenLayers Test</h1>
+<div id="panel"></div>
+<div id="map"></div>
+<textarea style="display:none" id="serialize" cols="96" rows="10"/>
+</body>
+</body>
+</html>

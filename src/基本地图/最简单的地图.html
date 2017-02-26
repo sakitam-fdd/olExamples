@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>最简单的地图</title>
+    <link rel="stylesheet" href="../public/map/ol.css">
+    <script type="text/javascript" src="../public/map/ol.js"></script>
+</head>
+<body>
+<div id="map"></div>
+<script type="text/javascript">
+    var map = new ol.Map({
+        view: new ol.View({
+            center: [0, 0], //视图的初始中心
+            zoom: 1        //用于缩放视图的初始分辨率
+        }),
+        layers: [
+            new ol.layer.Tile({  //Tile预渲染层
+                source: new ol.source.MapQuest({layer: 'osm'})
+            })
+        ],
+        target: 'map'//地图的容器，可以是id或者元素，必须在地图初始化的时候指定。
+    });
+</script>
+</body>
+</html>

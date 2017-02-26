@@ -1,0 +1,48 @@
+@import "fonticon/iconfont.css";
+@font-face {font-family: "iconfont";
+  src: url('fonticon/iconfont.eot?t=1467093109'); /* IE9*/
+  src: url('fonticon/iconfont.eot?t=1467093109#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('fonticon/iconfont.woff?t=1467093109') format('woff'), /* chrome, firefox */
+  url('fonticon/iconfont.ttf?t=1467093109') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+  url('fonticon/iconfont.svg?t=1467093109#iconfont') format('svg'); /* iOS 4.1- */
+}
+.iconfont {
+  font-family:"iconfont" !important;
+  font-size:16px;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: 0.2px;
+  -moz-osx-font-smoothing: grayscale;
+}
+/*.cssmarker-pin {
+  width: 30px;
+  height: 30px;
+  -webkit-border-radius: 50% 50% 50% 0;
+  border-radius: 50% 50% 50% 0;
+  position: relative;
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+  z-index:2;
+}
+.cssmarker-pin > span {
+  color:white;
+  position: absolute;
+  transform: rotate(45deg);
+  text-align:center;
+  margin-top:7px;
+  width:100%;
+}*/
+.haha{
+  font-size: 16px;
+  color: #0B61A4;
+}
+.cssmarker-pin > span{
+  font-size:16px;
+}
+.cssmarker-pin > span:before{
+  content: '\e60d';
+  color: #0aa2b9;
+}

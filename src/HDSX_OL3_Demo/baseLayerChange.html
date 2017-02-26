@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>底图切换demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!--引入bootstrap，jQuery，ol3ku-->
+    <link rel="stylesheet" href="../hdsx/public/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../hdsx/public/map/ol.css">
+    <script type="text/javascript" src="../hdsx/public/jquery-2.0.3.js"></script>
+    <script type="text/javascript" src="../hdsx/public/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../hdsx/public/map/ol.js"></script>
+    <style type="text/css">
+      .container{
+        width: 100%;
+        margin-top: 20px;
+      }
+      .container .container{
+        width: 480px;
+        margin: 0 auto;
+      }
+      .map{
+        width: 100%; height: 640px;
+        margin: 10px auto;
+        border: 1px solid #2e2e2e;
+      }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="container" id="btn">
+    <button type="button" class="btn btn-primary" id="btn1" value="base">加载ol基本底图</button>
+    <button type="button" class="btn btn-success" id="btn2" value="tianditu">加载天地图</button>
+    <button type="button" class="btn btn-info" id="btn3" value="baidumap">加载百度地图</button>
+    <button type="button" class="btn btn-warning" id="btn4" value="gaode">加载高德地图</button>
+  </div>
+  <div class="map" id="map"></div>
+</div>
+<script type="text/javascript">
+  var map;
+  function init() {
+    /*默认显示基本地图*/
+    var baseLayer = [];
+    baseLayer.push(
+      new ol.layer.Tile({
+        source: new ol.source.OSM(),
+        visible:true,
+        layerName: "base",
+      })
+    );
+    baseLayer.push(
+      new ol.layer.Tile({
+        source: new ol.source.XYZ({
+          url: 'http://t3.tianditu.com/DataServer?T=img_w&x={x}&y={y}&l={z}'
+        }),
+        visible:false,
+        layerName: "tianditu",
+      })
+    )
+    /*加载百度地图*/
+    var projection = ol.proj.get("EPSG:3857");
+    var resolutions = [];
+    for(var i=0; i<19; i++){
+      resolutions[i] = Math.pow(2, 18-i);
+    }
+    var tilegrid  = new ol.tilegrid.TileGrid({
+      origin: [0,0],
+      resolutions: resolutions
+    });
+
+    var baidu_source = new ol.source.TileImage({
+      projection: projection,
+      tileGrid: tilegrid,
+      tileUrlFunction: function(tileCoord, pixelRatio, proj){
+        if(!tileCoord){
+          return "";
+        }
+        var z = tileCoord[0];
+        var x = tileCoord[1];
+        var y = tileCoord[2];
+
+        if(x<0){
+          x = "M"+(-x);
+        }
+        if(y<0){
+          y = "M"+(-y);
+        }
+        return "http://online3.map.bdimg.com/onlinelabel/?qt=tile&x="+x+"&y="+y+"&z="+z+"&styles=pl&udt=20151021&scaler=1&p=1";
+      }
+    });
+    baseLayer.push(
+      new ol.layer.Tile({
+        source: baidu_source,
+        visible:false,
+        layerName: "baidumap",
+      })
+    )
+    /*加载高德地图*/
+    baseLayer.push(
+      new ol.layer.Tile({
+        source: new ol.source.XYZ({
+          url: 'http://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x=${x}&y=${y}&z=${z}'
+        }),
+        visible:false,
+        layerName: "gaode",
+      })
+    )
+    var view = new ol.View({
+      center: [0, 0],
+      zoom: 2
+    });
+    var scaleLineControl = new ol.control.ScaleLine();//创建一个比例尺
+    map = new ol.Map({
+      target: 'map',
+      controls: ol.control.defaults({
+        attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+          collapsible: false
+        })
+      }).extend([
+        scaleLineControl
+      ]),
+      interactions: ol.interaction.defaults({doubleClickZoom: false}),
+      layers: baseLayer,    //必须定义
+      view: view
+    });
+    function getlayerByName(layername) {
+      var targetLayer = null;
+      if (map) {
+        var layers = map.getLayers();
+        layers.forEach(function (layer) {
+          layer.setVisible(false);
+          var layernameTemp = layer.get("layerName");
+          if (layernameTemp === layername) {
+            targetLayer = layer;
+          }
+        }, this);
+      }
+      return targetLayer;
+    };
+    $("#btn1").click(function () {
+      var baseLayer = getlayerByName(this.value);
+      baseLayer.setVisible(true);
+    });
+    $("#btn2").click(function () {
+      var baseLayer = getlayerByName(this.value);
+      baseLayer.setVisible(true);
+    });
+    $("#btn3").click(function () {
+      var baseLayer = getlayerByName(this.value);
+      baseLayer.setVisible(true);
+    });
+    $("#btn4").click(function () {
+      var baseLayer = getlayerByName(this.value);
+      baseLayer.setVisible(true);
+    });
+    return map;
+  }
+  init();
+  console.log(map);
+</script>
+</body>
+</html>

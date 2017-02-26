@@ -1,0 +1,376 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>PPVision 控件测试页面</title>
+    <link rel="stylesheet" typw="text/css" href="css/ol.css"/>
+    <link rel="stylesheet" type="text/css" href="css/pictures.css">
+    <link rel="stylesheet" type="text/css" href="css/fonticon/iconfont.css">
+    <link rel="stylesheet" type="text/css" href="css/popup.css">
+
+    <style type="text/css">
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            background-color: #808080
+        }
+
+        p, span {
+            margin-left: 2px;
+            font-family: 微软雅黑;
+            font-size: 12px;
+            color: #ffffff
+        }
+
+        img {
+            height: 400px;
+            width: auto;
+        }
+
+        .button {
+            width: 70px;
+            height: 20px;
+            border: 0;
+            font-family: 微软雅黑;
+            font-size: 12px;
+        }
+
+        #mask {
+            position: fixed;
+            left: 0px;
+            top: 0px;
+            z-index: 100;
+        }
+
+        #toolbar {
+            left: 0px;
+            top: 0px;
+            z-index: 100;
+        }
+
+        #PPVision {
+            z-index: 100;
+            width: 50%;
+            height: 80%;
+            float: left;
+        }
+
+        #map {
+            width: 50%;
+            height: 80%;
+            float: left;
+        }
+
+        #history {
+            left: 20%;
+            top: 25%;
+            width: 60%;
+            height: 480px;
+            position: absolute;
+            background-color: #FFFFFF;
+            z-index: 9999;
+        }
+
+    </style>
+</head>
+
+<body>
+<object id="PPVision" classid="CLSID:C2DF135F-24D6-49F7-820A-6CD1B264A60F">
+</object>
+<div id="map">
+    <div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div id="popup-title" class="popup-title"></div>
+        <div id="popup-content" class="popup-content"></div>
+    </div>
+</div>
+
+<div class="pictures">
+    <a class="l_arrow" onclick="lastOne()" title="上一张">
+        <span class="left-arrow iconfont icon-jiantouzuo"></span>
+    </a>  <!--上一张-->
+    <div class="picture-container">
+        <div class="picture-wraper">
+
+        </div>
+    </div>
+    <a class="r_arrow" onclick="nextOne()" class="r_arrow" title="下一张">
+        <span class="right-arrow iconfont icon-jiantouyou"></span>
+    </a><!--下一张-->
+</div>
+
+
+</body>
+
+<script type="text/javascript" src="js/public/ol.js"></script>
+<script type="text/javascript" src="js/public/jquery-1.12.3.min.js"></script>
+<script type="text/javascript" src="js/pictures.js"></script>
+
+<script type="text/javascript">
+    var self = this;
+    var lineString = "", marker = "";
+    var esriJSON = new ol.format.EsriJSON();
+    function getDrag() {
+        var app = {};
+        app.Drag = function () {
+            ol.interaction.Pointer.call(this, {
+                handleDownEvent: app.Drag.prototype.handleDownEvent,
+                handleDragEvent: app.Drag.prototype.handleDragEvent,
+                handleMoveEvent: app.Drag.prototype.handleMoveEvent,
+                handleUpEvent: app.Drag.prototype.handleUpEvent
+            });
+            this.customType = "appDrag";
+            this.coordinate_ = null;
+            this.cursor_ = 'pointer';
+            this.feature_ = null;
+            this.previousCursor_ = undefined;
+
+        };
+        ol.inherits(app.Drag, ol.interaction.Pointer);
+        app.Drag.prototype.handleDownEvent = function (evt) {
+            if (evt.originalEvent.button === 0/*鼠标左键*/) {
+                var map = evt.map;
+                var feature = map.forEachFeatureAtPixel(evt.pixel,
+                        function (feature) {
+                            return feature;
+                        });
+                if (feature) {
+                    this.coordinate_ = evt.coordinate;
+                    this.feature_ = feature;
+                }
+                return !!feature;
+            }
+        };
+        app.Drag.prototype.handleDragEvent = function (evt) {
+            if (!this.coordinate_) {
+                return;
+            }
+            var deltaX = evt.coordinate[0] - this.coordinate_[0];
+            var deltaY = evt.coordinate[1] - this.coordinate_[1];
+            var geometry = /** @type {ol.geom.SimpleGeometry} */
+                    (this.feature_.getGeometry());
+            geometry.translate(deltaX, deltaY);
+            this.coordinate_[0] = evt.coordinate[0];
+            this.coordinate_[1] = evt.coordinate[1];
+            this.feature_.dispatchEvent("featureMove");
+        };
+
+        app.Drag.prototype.handleMoveEvent = function (evt) {
+            if (this.cursor_) {
+                var map = evt.map;
+                var feature = null;
+                if (this.feature_) {
+                    feature = this.feature_;
+                } else {
+                    feature = map.forEachFeatureAtPixel(evt.pixel,
+                            function (feature) {
+                                return feature;
+                            });
+                }
+
+                var element = evt.map.getTargetElement();
+                if (feature) {
+                    if (element.style.cursor != this.cursor_) {
+                        this.previousCursor_ = element.style.cursor;
+                        element.style.cursor = this.cursor_;
+                    }
+                } else if (this.previousCursor_ !== undefined) {
+                    element.style.cursor = this.previousCursor_;
+                    this.previousCursor_ = undefined;
+                }
+            }
+        };
+
+        app.Drag.prototype.handleUpEvent = function (event) {
+            if (lineString) {
+                var p = lineString.getClosestPoint(this.coordinate_);
+                marker.setGeometry(new ol.geom.Point(p));
+            }
+            PPVision.locate(3, p[0], p[1], 0);
+            this.coordinate_ = null;
+            this.feature_ = null;
+
+            return false;
+        };
+        return app;
+    }
+
+    $(document).ready(function () {
+        var Dragger = getDrag();
+        var url = "http://171.34.40.68:6080/arcgis/rest/services/JXMAP_2016/MapServer";
+        var layerUrl = "http://211.101.37.253:6080/arcgis/rest/services/PPVWGS84/MapServer";
+        var jsonurl = url + "/?f=pjson";
+        var resolutions = [];
+        var center = [115.657373, 28.667832];
+        var popupHtml = "<table>" +
+                "<tr><th>隧道名称：</th><td>萧峰隧道</td><th>隧道编码：</th><td>S40360122U0010</td></tr>" +
+                "<tr><th>路线编码：</th><td>S40</td><th>路线名称：</th><td>昌铜高速</td></tr>" +
+                "<tr><th>中心桩号：</th><td>8.166</td><th>隧道分类：</th><td>长隧道</td></tr>" +
+                "<tr><th>隧道长度：</th><td>1195.00</td><th>隧道净宽：</th><td>10.750</td></tr>" +
+                "<tr><th>隧道净高：</th><td>5.00</td><th>评定等级：</th><td>S</td></tr>" +
+                "<tr><th>评定日期：</th><td>201112</td></tr>" +
+                "</table>";
+        $.ajax({
+            url: jsonurl,
+            type: "GET",
+            dataType: 'jsonp',
+            jsonp: 'callback',
+            success: function (data) {
+                var fullExtent = [data.fullExtent.xmin, data.fullExtent.ymin, data.fullExtent.xmax, data.fullExtent.ymax];
+                var projection = ol.proj.get("EPSG:" + data.spatialReference.wkid);
+                projection.setExtent(fullExtent);
+                var resolutions = [];
+                var origin = [data.tileInfo.origin.x, data.tileInfo.origin.y];
+                var len = data.tileInfo.lods.length;
+
+                for (var i = 0; i < len; i++) {
+                    resolutions.push(data.tileInfo.lods[i].resolution);
+                }
+                var tileGrid = new ol.tilegrid.TileGrid({
+                    tileSize: data.tileInfo.cols,
+                    origin: origin,
+                    extent: fullExtent,
+                    resolutions: resolutions
+                });
+                var urlTemplate = url + "/tile/{z}/{y}/{x}";
+                var tileArcGISXYZ = new ol.source.XYZ({
+                    wrapX: false,
+                    tileGrid: tileGrid,
+                    projection: projection,
+                    tileUrlFunction: function (tileCoord) {
+                        var url = urlTemplate.replace('{z}', (tileCoord[0]).toString())
+                                .replace('{x}', tileCoord[1].toString())
+                                .replace('{y}', (-tileCoord[2] - 1).toString());
+                        return url;
+                    }
+                });
+                var baseLayer = new ol.layer.Tile({
+                    source: tileArcGISXYZ
+                });
+
+                var container = document.getElementById('popup');
+                var content = document.getElementById('popup-content');
+                var title = document.getElementById('popup-title');
+                var closer = document.getElementById('popup-closer');
+                closer.onclick = function () {
+                    container.style.display = 'none';
+                    closer.blur();
+                    return false;
+                };
+                var overlay = new ol.Overlay({
+                    id: "testPoput",
+                    element: container
+                });
+
+                self.map = new ol.Map({
+                    target: "map",
+                    controls: [new ol.control.ScaleLine({})],
+                    interactions: ol.interaction.defaults({doubleClickZoom: false}).extend([new Dragger.Drag()]),
+                    layers: [baseLayer],
+                    view: new ol.View({
+                        center: ol.proj.fromLonLat(center, projection),
+                        zoom: 6,
+                        projection: projection,
+                        extent: fullExtent,
+                        maxResolution: resolutions[0],
+                        minResolution: resolutions[len - 1]
+                    })
+                });
+                self.map.on('click', function (evt) {
+                    var coordinate = evt.coordinate;
+                    var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
+                            coordinate, 'EPSG:4326', 'EPSG:4326'));
+                    overlay.setPosition(coordinate);
+                    if (!self.map.getOverlayById("testPoput")) {
+                        self.map.addOverlay(overlay);
+                    }
+                    content.innerHTML = popupHtml;
+                    container.style.display = 'block';
+                    title.innerHTML = "要素信息";
+                    title.style.display = 'block';
+                    //self.map.getView().setCenter(coordinate);
+                });
+
+                var vector = new ol.source.TileArcGISRest({
+                    projection: projection,
+                    url: layerUrl,
+                    wrapX: false,
+                    params: {
+                        "DPI": 96
+                    }
+                });
+                var layer = new ol.layer.Tile({
+                    source: vector
+                });
+                self.map.addLayer(layer);
+                self.map.on("postcompose", function (event) {
+                    var myExtent = self.map.getView().calculateExtent(self.map.getSize());
+                    var url = layerUrl + '/1/query/?f=json&returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
+                            encodeURIComponent('{"xmin":' + myExtent[0] + ',"ymin":' +
+                                    myExtent[1] + ',"xmax":' + myExtent[2] + ',"ymax":' + myExtent[3] +
+                                    ',"spatialReference":{"wkid":4326}}') +
+                            '&geometryType=esriGeometryEnvelope&inSR=4326&outSR=4326';
+                    $.ajax({
+                        url: url,
+                        dataType: 'jsonp',
+                        success: function (response) {
+                            if (response.error) {
+                                console.error(response.error.message + '\n' +
+                                        response.error.details.join('\n'));
+                            } else {
+                                lineString = esriJSON.readGeometry(response.features[0].geometry);
+                            }
+                        }
+                    });
+                });
+                var vectorLayer = new ol.layer.Vector({
+                    source: new ol.source.Vector({
+                        wrapX: false
+                    })
+                });
+                // 最后初始化ocx，然后定位到某一帧
+                initPPVision();
+                self.map.getView().setZoom(7);
+            },
+            error: function (err) {
+                console.error(err);
+            }
+        });
+    });
+    function addMarker(center) {
+        var vectorLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                wrapX: false
+            })
+        });
+        marker = new ol.Feature({
+            geometry: new ol.geom.Point(center)
+        });
+        var style = new ol.style.Style({
+            image: new ol.style.Icon({
+                anchor: [0.5, 50],
+                rotation: -30,
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                opacity: 0.75,
+                src: "icon/eye2.png"
+            })
+        });
+        marker.setStyle(style);
+        vectorLayer.getSource().addFeature(marker);
+        self.map.addLayer(vectorLayer);
+    }
+    function clearGraphics() {
+        //self.map.getOverlays().clear();
+        var layers = this.map.getLayers();
+        layers.forEach(function (layer) {
+            var source = layer.getSource();
+            if (source && source.clear) {
+                source.clear();
+            }
+        });
+    };
+</script>
+<script type="text/javascript" src="js/PPVision.js"></script>
+</html>

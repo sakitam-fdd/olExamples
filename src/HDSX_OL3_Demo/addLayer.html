@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图层叠加</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!--引入bootstrap，jQuery，ol3ku-->
+    <link rel="stylesheet" href="../hdsx/public/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../hdsx/public/map/ol.css">
+    <script type="text/javascript" src="../hdsx/public/jquery-2.0.3.js"></script>
+    <script type="text/javascript" src="../hdsx/public/bootstrap/js/bootstrap.min.js"></script>
+    <!--<script type="text/javascript" src="../hdsx/public/map/ol.js"></script>-->
+    <script type="text/javascript" src="../hdsx/public/map/ol-debug.js.js"></script>
+    <style type="text/css">
+      .container{
+        width: 100%;
+        margin-top: 20px;
+      }
+      .container .container{
+        width: 740px;
+        margin: 0 auto;
+      }
+      .map{
+        width: 100%; height: 640px;
+        margin: 10px auto;
+        border: 1px solid #2e2e2e;
+        /*position: relative;*/
+      }
+      .ol-ZoomSlider{
+        position: absolute;
+        background : transparent;
+        top        : 3em;
+        height     : 194px;
+      }
+      .ol-scale-line{
+        position: absolute;
+        background-color: transparent;
+        bottom: 3em;
+        left: 20px;
+      }
+    </style>
+</head>
+<body>
+<div class="container">
+  <div class="container" id="btn">
+    <button type="button" class="btn btn-primary" id="btn1" value="base">加载ol基本底图</button>
+    <button type="button" class="btn btn-success" id="btn2" value="td">加载天地图</button>
+    <button type="button" class="btn btn-info" id="btn3" value="baidu">加载百度地图</button>
+    <button type="button" class="btn btn-warning" id="btn4" value="gaode">加载高德地图</button>
+    <button type="button" class="btn btn-danger" id="btn5">加载公司全国地图</button>
+    <button type="button" class="btn btn-primary" id="btn6">加载江西地图</button>
+  </div>
+  <div class="map" id="map"></div>
+</div>
+<script type="text/javascript">
+  var map;
+  var baseLayer,view;
+  var center = [115.92466595234826, 27.428038204473552];//江西省
+  var extent = [109.72859368643232, 24.010266905347684, 121.13105988819079, 30.76693489432357];
+  function init() {
+    /*默认显示基本地图*/
+    baseLayer = new ol.layer.Tile({
+      source: new ol.source.OSM(),
+      isBaseLayer: true,//通用基本图层
+      isCurrentBaseLayer: true,//当前通用基本图层
+      layerName: "base",
+      extent: extent
+    });
+    /*view = new ol.View({
+      center:[0, 0],
+      zoom:2,
+      maxZoom:10
+    });*/
+    var projection = ol.proj.get("EPSG:4326");
+    projection.setExtent(extent);
+    view = new ol.View({
+      center: ol.proj.fromLonLat(center, projection),//从经度/纬度坐标转换到一个不同的投影,pro:目标投射
+      zoom: 2,//目标缩放
+      projection: projection,
+      maxZoom:10
+    })
+    /***************创建地图容器****************/
+    map = new ol.Map({
+      target: 'map',
+      controls: ol.control.defaults({
+        attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+          collapsible: false
+        })
+      }).extend([
+        new ol.control.ScaleLine({//缩放条的设置：'degrees', 'imperial', 'nautical', 'metric', 'us'
+          units: 'metric'
+        })
+      ]),
+      interactions: ol.interaction.defaults({doubleClickZoom: false}),
+      layers: [baseLayer],    //必须定义
+      view: view
+    });
+    var zoomslider = new ol.control.ZoomSlider();
+    map.addControl(zoomslider);
+  };
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ol3底图加载</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!--引入bootstrap，jQuery，ol3ku-->
+    <link rel="stylesheet" href="../hdsx/public/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../hdsx/public/map/ol.css">
+    <script type="text/javascript" src="../hdsx/public/jquery-2.0.3.js"></script>
+    <script type="text/javascript" src="../hdsx/public/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../hdsx/public/map/ol.js"></script>
+    <style type="text/css">
+      .container{
+        width: 100%;
+        margin-top: 20px;
+      }
+      .container .container{
+        width: 740px;
+        margin: 0 auto;
+      }
+      .map{
+        width: 100%; height: 640px;
+        margin: 10px auto;
+        border: 1px solid #2e2e2e;
+        position: relative;
+      }
+      .ol-ZoomSlider{
+        position: absolute;
+        background : transparent;
+        top        : 3em;
+        height     : 194px;
+      }
+      .ol-scale-line{
+        position: absolute;
+        background-color: transparent;
+        bottom: 3em;
+        left: 20px;
+      }
+    </style>
+</head>
+<body>
+<div class="container">
+  <div class="container" id="btn">
+    <button type="button" class="btn btn-primary" id="btn1" value="base">加载ol基本底图</button>
+    <button type="button" class="btn btn-success" id="btn2" value="td">加载天地图</button>
+    <button type="button" class="btn btn-info" id="btn3" value="baidu">加载百度地图</button>
+    <button type="button" class="btn btn-warning" id="btn4" value="gaode">加载高德地图</button>
+    <button type="button" class="btn btn-danger" id="btn5">加载公司全国地图</button>
+    <button type="button" class="btn btn-primary" id="btn6">加载江西地图</button>
+  </div>
+  <div class="map" id="map"></div>
+</div>
+<script type="text/javascript">
+  var scaleLineControl = new ol.control.ScaleLine();//创建一个比例尺
+  var map;
+  function init() {
+    /*默认显示基本地图*/
+    var baseLayer = new ol.layer.Tile({
+        source: new ol.source.OSM(),
+        isBaseLayer: true,//通用基本图层
+        isCurrentBaseLayer: true,//当前通用基本图层
+        layerName: "base",
+      });
+    var view = new ol.View({
+      center: [0, 0],
+      zoom: 2
+    });
+    /***************创建地图容器****************/
+    var map = new ol.Map({
+      target: 'map',
+      controls: ol.control.defaults({
+        attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+          collapsible: false
+        })
+      }).extend([
+        scaleLineControl
+      ]),
+      interactions: ol.interaction.defaults({doubleClickZoom: false}),
+      layers: [baseLayer],    //必须定义
+      view: view
+    });
+    function getlayerByName(layername) {
+      var targetLayer = null;
+      if (map) {
+        var layers = map.getLayers();
+        layers.forEach(function (layer) {
+          var layernameTemp = layer.get("layerName");
+          if (layernameTemp === layername) {
+            targetLayer = layer;
+          }
+        }, this);
+      }
+      return targetLayer;
+    }
+    $("#btn2").click(function () {
+      map.getLayers().forEach(function (layer) {
+        if (layer.get("isBaseLayer")) {
+          layer.set("isCurrentBaseLayer", false);
+          layer.setVisible(false);
+        }
+      });
+      var baseLayer = getlayerByName(this.value);
+      baseLayer.setVisible(true);
+      baseLayer.set("isCurrentBaseLayer", true);
+    });
+    return map;
+  }
+  setTimeout(function () {
+    loadjxmap();
+    loadtianditu();
+  },3000);
+  function loadjxmap() {
+    /*加载江西地图*/
+    var layerTitle = "http://171.34.40.68:6080/arcgis/rest/services/JXMAP_2016/MapServer";//公司江西省地图
+    var center=[115.92466595234826, 27.428038204473552];//江西省
+    $.ajax({
+      url: layerTitle + "?f=pjson",
+      type: "GET",
+      dataType: 'jsonp',
+      jsonp: 'callback',
+      success: function (data) {
+        var fullExtent = [data.fullExtent.xmin, data.fullExtent.ymin, data.fullExtent.xmax, data.fullExtent.ymax];//获得地图范围
+        var projection = ol.proj.get("EPSG:" + data.spatialReference.wkid);//获得投影对象？
+        projection.setExtent(fullExtent);//设置可见范围
+        var resolutions = [];
+        var origin = [data.tileInfo.origin.x, data.tileInfo.origin.y];
+        var len = data.tileInfo.lods.length;
+
+        for (var i = 0; i < len; i++) {
+          resolutions.push(data.tileInfo.lods[i].resolution);
+        }
+        var tileGrid = new ol.tilegrid.TileGrid({
+          tileSize: data.tileInfo.cols,
+          origin: origin,
+          extent: fullExtent,
+          resolutions: resolutions
+        });
+        var urlTemplate = layerTitle + "/tile/{z}/{y}/{x}";
+        var tileArcGISXYZ = new ol.source.XYZ({//XYZ 格式的切片数据，继承自 ol.source.TileImage
+          wrapX: false,//是否包含世界地图，默认true
+          tileGrid: tileGrid,//瓦片网格
+          projection: projection,//地图投影映射
+          tileUrlFunction: function (tileCoord) {//获得给定一个瓦片地图URL坐标和投影
+            var url = urlTemplate.replace('{z}', (tileCoord[0]).toString())
+              .replace('{x}', tileCoord[1].toString())
+              .replace('{y}', (-tileCoord[2] - 1).toString());
+            return url;
+          }
+        });
+        var baseLayer = new ol.layer.Tile({//基本图层：二维，影像，DOM
+          isBaseLayer: false,//通用基本图层
+          isCurrentBaseLayer: true,//当前通用基本图层
+          source: tileArcGISXYZ,
+          extent: fullExtent
+        });
+        var view = new ol.View({
+          center: ol.proj.fromLonLat(center, projection),//从经度/纬度坐标转换到一个不同的投影,pro:目标投射
+          zoom: 1,//目标缩放
+          projection: projection,//设置地图投影
+          extent: fullExtent,//设置地图范围
+          maxResolution: resolutions[0],//最大分辨率
+          minResolution: resolutions[len - 1]//最小分辨率
+        })
+      }
+    });
+    console.log(map);
+    map.addLayer(baseLayer)
+  }
+  function loadtianditu() {
+    var baseLayer = new ol.layer.Tile({
+      title: "天地图路网",
+      layerName:"td",
+      isBaseLayer: false,//通用基本图层
+      isCurrentBaseLayer: true,//当前通用基本图层
+      source: new ol.source.XYZ({
+        url: "http://t4.tianditu.com/DataServer?T=vec_w&x={x}&y={y}&l={z}"
+      })
+    });
+    var view = new ol.View({
+      center: [0, 0],
+      zoom  : 2
+    });
+    map.addLayer(baseLayer);
+  }
+  init();
+</script>
+</body>
+</html>

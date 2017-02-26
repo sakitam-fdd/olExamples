@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <link rel="stylesheet" href="../public/map/ol.css">
+  <script type="text/javascript" src="../public/map/ol.js"></script>
+</head>
+<body>
+<div id="map" class="map"></div>
+<script>
+  var raster = new ol.layer.Tile({
+    source: new ol.source.OSM()
+  });
+  var map = new ol.Map({//创建地图
+    layers: [raster],
+    target: 'map',
+    view: new ol.View({
+      center: [-11000000, 4600000],
+      zoom: 15
+    })
+  });
+  var HTML;
+  map.on('pointermove', pointerMoveHandler);//地图移动事件
+  function pointerMoveHandler(evt) {
+    HTML.innerHTML = evt.coordinate;
+    console.log(evt.coordinate);
+  }
+</script>
+</body>
+</html>

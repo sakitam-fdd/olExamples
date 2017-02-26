@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>openlayer展示</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!--引入bootstrap，jQuery，ol3ku-->
+  <link rel="stylesheet" href="../hdsx/public/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../hdsx/public/map/ol.css">
+  <script type="text/javascript" src="../hdsx/public/jquery-2.0.3.js"></script>
+  <script type="text/javascript" src="../hdsx/public/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../hdsx/public/map/ol.js"></script>
+  <!--<script type="text/javascript" src="../hdsx/public/map/ol-debug.js"></script>-->
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="container">
+  <div class="container" id="btn">
+    <button type="button" class="btn btn-primary" id="btn1" value="base">加载ol基本底图</button>
+    <button type="button" class="btn btn-success" id="btn2" value="tianditu">加载天地图</button>
+    <button type="button" class="btn btn-info" id="btn3" value="baidumap">加载百度地图</button>
+    <button type="button" class="btn btn-warning" id="btn4" value="gaode">加载高德地图</button>
+  </div>
+  <div class="container draw">
+    <button type="button" class="btn btn-warning" id="btn5" value="">单点标绘</button>
+    <button type="button" class="btn btn-primary" id="btn6" value="">多点标绘</button>
+    <button type="button" class="btn btn-success" id="btn7" value="">标绘线</button>
+    <button type="button" class="btn btn-success" id="btn8" value="">清空地图</button>
+  </div>
+  <!--<div class="container draw">
+    <button type="button" class="btn btn-warning" id="btn9" value="">点击事件</button>
+    <button type="button" class="btn btn-primary" id="btn10" value="">多点标绘</button>
+    <button type="button" class="btn btn-success" id="btn11" value="">标绘线</button>
+    <button type="button" class="btn btn-success" id="btn12" value="">清空地图</button>
+  </div>-->
+  <div class="map" id="map"></div>
+</div>
+<script type="text/javascript" src="js/map.js"></script>
+<script type="text/javascript" src="js/main.js"></script>
+</body>
+</html>

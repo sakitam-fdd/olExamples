@@ -1,0 +1,361 @@
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>三维实景</title>
+  <link rel="stylesheet" type="text/css" href="css/ol.css">
+  <style type="text/css">
+    #map {
+      width:100%;
+      height:100%;
+    }
+    .share {
+      position: absolute;
+      top: 80px;
+      left: 10px;
+      border: 1px;
+      border-color: #333;
+      background-color: #339999;
+      color: #fff;
+      box-shadow: 0px 0px 2px #666;
+      cursor: pointer;
+      padding: 0 4px 0 4px;
+    }
+    menu {list-style: none;}
+
+    .ol-control button:focus, .ol-control button:hover {
+      text-decoration: none;
+      color:#308cff;
+      background-color: #fff;
+    }
+
+    .ol-zoom{
+      left:10px;
+    }
+    .ol-touch .ol-control button {
+      font-size: 1.5em;
+    }
+    .ol-zoom .ol-zoom-in {
+      margin-top: 60px;
+      border-radius: 2px 2px 0 0;
+    }
+    .ol-zoom .ol-zoom-out {
+      border-radius: 2px 2px 0 0;
+      margin-top: 2px;
+    }
+    .ol-control button {
+      display: block;
+      padding: 0;
+      color: #666666;
+      font-size: 1.14em;
+      font-weight: 700;
+      text-decoration: none;
+      text-align: center;
+      box-shadow: 2px 2px 5px #888888;
+      height: 28px;
+      width: 28px;
+      line-height: .4em;
+      background-color: #fff;
+      border: none;
+      border-radius: 2px;
+    }
+
+    .ol-scale-line {
+      background-color: transparent;
+      border-radius: 4px;
+      bottom: 8px;
+      left: 8px;
+    }
+    .ol-control, .ol-scale-line {
+      position: absolute;
+      padding: 2px;
+    }
+
+    .element.style {
+      width: 70px;
+    }
+    .ol-scale-line-inner {
+      border: 2px solid #000000;
+      border-top: none;
+      color: #000000;
+      font-size: 10px;
+      text-align: center;
+      margin: 1px;
+      will-change: contents, width;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="css/popup.css">
+  <link rel="stylesheet" type="text/css" href="css/fonticon/iconfont.css">
+  <link rel="stylesheet" type="text/css" href="css/layer.css">  <!--图层样式-->
+  <link rel="stylesheet" type="text/css" href="js/public/jquery-easyui-1.4.4/themes/metro/easyui.css">
+  <link rel="stylesheet" type="text/css" href="js/public/jquery-easyui-1.4.4/themes/icon.css">
+  <link rel="stylesheet" type="text/css" href="js/public/jquery-easyui-1.4.4/themes/demo.css">
+</head>
+
+<body>
+<div class="easyui-layout" style="width: 100%; height: 100%;overflow: hidden;">
+  <!-- 页头 -->
+  <div data-options="region:'north', border: false" class="main-layout-top-logo">
+    <img src="img/logo.png" class="logo"/>
+    <div class="tuichu">退出</div>
+  </div>
+  <!-- 工作区 -->
+  <div data-options="region:'center', border: false" style="height: 94%;">
+    <img src="img/zhinanzhen.png" class="zhinanzhen"/>
+    <div id="map">
+      <div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div id="popup-title" class="popup-title"></div>
+        <div id="popup-content" class="popup-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--图层-->
+<div class="layer-icon" id="layerBtn" onclick="layerSwitch()">
+  <span class="iconfont icon-tuceng"></span>
+</div>
+<!--底图切换-->
+<div class="right-bottom">
+  <ul id="maptype">
+    <li class="maptype nomal nomalsel">
+      <div>矢量</div>
+    </li>
+    <li class="maptype yixiang">
+      <div>影像</div>
+    </li>
+  </ul>
+</div>
+</body>
+<script type="text/javascript" src="js/public/jquery-1.12.3.min.js"></script>
+<script type="text/javascript" src="js/public/ol.js"></script>
+<script type="text/javascript" src="js/public/proj4.js"></script>
+<script type="text/javascript" src="js/hdmap.js"></script>
+<script type="text/javascript" src="js/popup.js"></script>
+<script type="text/javascript" src="config/layerConfig.js"></script>
+<script type="text/javascript">
+  //Demo 应用
+  var hdmap = new HdMap();
+  $(document).ready(function () {
+    loadTileMap();
+  });
+
+  /**
+   * 加载矢量地图
+   */
+  function loadTileMap(){
+    $.ajax({
+      url: mapConfig.baseLayers[0].layerUrl+"/?f=pjson",
+      dataType: 'jsonp',
+      async:false,
+      success: function (data) {
+        if (data.error) {
+          console.error(data.error.message + '\n' +data.error.details.join('\n'));
+          return;
+        };
+        var parameter = new MapServerParameter();
+        parameter.layerUrl = mapConfig.baseLayers[0].layerUrl;
+        parameter.layerName = mapConfig.baseLayers[0].layerName;
+        parameter.center = mapConfig.baseLayers[0].center;
+        parameter.wkid = data.spatialReference.wkid;
+        parameter.fullExtent = [data.fullExtent.xmin, data.fullExtent.ymin, data.fullExtent.xmax, data.fullExtent.ymax];
+        parameter.origin = [data.tileInfo.origin.x, data.tileInfo.origin.y];
+        parameter.tileSize = [data.tileInfo.cols,data.tileInfo.rows];
+        parameter.projection = ol.proj.get("EPSG:" + data.spatialReference.wkid);
+        var len = data.tileInfo.lods.length;
+        var resolutions = [];
+        for (var i = 0; i < len; i++) {
+          resolutions.push(data.tileInfo.lods[i].resolution);
+        }
+        parameter.resolutions = resolutions;
+        var mapLayer = hdmap.tileLayer(parameter);
+        mapLayer.set('isBaseLayer',true);
+        hdmap.init(parameter);
+        hdmap.addCircle([115.657373, 28.667832],20);
+        hdmap.onSelectFeature();
+        initPPVisition();
+        selectFeature();
+        loadImageMap();
+
+        //测试的画圆拖动，啊啊啊啊啊啊啊啊
+        /*var coor1,coor2;*/
+        /*window.ObservableObj.on('pointerdown',function (ev) {
+          var coor1 = ev.target.get("pointerdown");
+          window.ObservableObj.on('pointerup',function (ev) {
+            var coor2 = ev.target.get("pointerup");
+            var wgs84Sphere = new ol.Sphere(6378137);
+//							var length = wgs84Sphere.haversineDistance(coor1,coor2);
+            console.log(length);
+            var layer = hdmap.getLayerByName("default");
+            var feature = layer.getSource().getFeatureById('circle');
+            var circenter = feature.getGeometry().getCoordinates();
+            var length = wgs84Sphere.haversineDistance(coor2,circenter);
+            var output;
+            if (length > 100) {
+              output = (Math.round(length / 1000 * 100) / 100);
+            } else {
+              output = (Math.round(length * 100) / 100);
+            }
+            console.log(output);
+            var str =$('.ol-scale-line-inner')[0].innerHTML;
+            var px = $('.ol-scale-line-inner')[0].clientWidth;
+            var stra = parseFloat(str);
+            var a= output/stra;
+            var b=a*px;
+            var bo= feature.getStyle().getImage().getRadius();
+            var cirstyle = new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: b,
+                fill: new ol.style.Fill({
+                  color: 'rgba(49,159,211, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({ //边界样式
+                  color: '#319FD3',
+                  width: 1
+                }),
+                zIndex:0
+              })
+            });
+            feature.setStyle(cirstyle);
+          });
+        });*/
+      }
+    });
+  }
+  /*
+   * 加载影像地图
+   * */
+  function loadImageMap() {
+    $.ajax({
+      url: mapConfig.baseLayers[1].layerUrl+"/?f=pjson",
+      dataType: 'jsonp',
+      async:false,
+      success: function (data) {
+        if (data.error) {
+          console.error(data.error.message + '\n' +data.error.details.join('\n'));
+          return;
+        };
+        var parameter = new MapServerParameter();
+        parameter.layerUrl = mapConfig.baseLayers[1].layerUrl;
+        parameter.layerName = mapConfig.baseLayers[1].layerName;
+        parameter.center = mapConfig.baseLayers[1].center;
+        parameter.wkid = data.spatialReference.wkid;
+        parameter.fullExtent = [data.fullExtent.xmin, data.fullExtent.ymin, data.fullExtent.xmax, data.fullExtent.ymax];
+        parameter.origin = [data.tileInfo.origin.x, data.tileInfo.origin.y];
+        parameter.tileSize = [data.tileInfo.cols,data.tileInfo.rows];
+        parameter.projection = ol.proj.get("EPSG:" + data.spatialReference.wkid);
+        var len = data.tileInfo.lods.length;
+        var resolutions = [];
+        for (var i = 0; i < len; i++) {
+          resolutions.push(data.tileInfo.lods[i].resolution);
+        }
+        parameter.resolutions = resolutions;
+        var mapLayer = hdmap.tileLayer(parameter);
+        mapLayer.set('isBaseLayer',true);
+        mapLayer.setVisible(false);
+        mapLayer.setZIndex(-1);
+        hdmap.olMap.addLayer(mapLayer);
+      }
+    });
+  }
+  function initPPVisition(){
+    var viewport =  hdmap.olMap.getViewport();
+    var initPPV = '<div class="PPV"><iframe width="472px" height="390px" frameborder="0" allowTransparency="true" scrolling="no" src="view/player.htm"></iframe></div>'
+    $(viewport).append(initPPV);
+  }
+  //显示左侧图层管理页面
+  function layerSwitch(){
+    var viewport =  hdmap.olMap.getViewport();
+    var content = '<div class="layer-page">' +
+      '<div class="title"><span class="iconfont icon-tuceng"></span><span class="name">图层管理</span>' +
+      '<span class="iconfont icon-iconguanbi" onclick="closeLayer()"></span></div>' +
+      '<iframe width="200px" height="420px" frameborder="0" scrolling="no" ' +
+      'src="view/switch.htm" id="switch"></iframe>' +
+      '</div>';
+    $(viewport).append('<div class="layer">'+content+'</div>');
+  }
+  //关闭左侧图层关联界面
+  function closeLayer() {
+    $(".layer").hide();
+  };
+  //关闭列表
+  function closeLists() {
+    $(".layerListT").hide();
+  };
+  $("#maptype").find(".maptype").bind("click", function (evt) {//绑定事件
+    var c = $(this).children("div").text();
+    $(this).addClass("selected");
+    $(this).siblings().removeClass("nomalsel");
+    $(this).siblings().removeClass("selected");
+    changeBaseLayer(c);
+  });
+  function getlayerByName(c) {
+    var targetLayer = null;
+    if (hdmap.olMap) {
+      var layers = hdmap.olMap.getLayers();
+      layers.forEach(function (layer) {
+        var isBaseLayer = layer.get("isBaseLayer");
+        if (isBaseLayer){
+          layer.setVisible(false);
+        }
+        var layernameTemp = layer.get("layerName");
+        if (layernameTemp === c) {
+          targetLayer = layer;
+        }
+      }, this);
+    }
+    return targetLayer;
+  }
+  function changeBaseLayer(c) {
+    var baseLayer = this.getlayerByName(c);
+    if(baseLayer){
+      baseLayer.setVisible(true);
+    }
+  };
+
+  window.ObservableObj.on("featureMove", function (event) {
+    var feat = event.target.get("featureMove");
+    var coordinate = feat.getGeometry().getCoordinates();
+    var geometry = {
+      "xmin":coordinate[0]-10,
+      "xmax":coordinate[0]+10,
+      "ymin":coordinate[1]-10,
+      "ymax":coordinate[1]+10
+    }
+    sessionStorage.setItem("geometry",JSON.stringify(geometry));
+  });
+
+  /**
+   * 要素选择接口
+   */
+  function selectFeature(){
+    hdmap.olMap.on('singleclick',function (evt) {
+      if (evt.originalEvent.button === 0/*鼠标左键*/) {
+        var map = evt.map;
+        var feature = map.forEachFeatureAtPixel(evt.pixel,
+          function (feature) {
+            return feature;
+          });
+        if(feature){
+          window.pro = feature.getProperties();
+          var viewport =  hdmap.olMap.getViewport();
+          var content = '<div class="attribute">' +
+            '<div class="title"><span class="iconfont icon-liebiao"></span><span class="name">属性信息</span>' +
+            '<span class="iconfont icon-iconguanbi" onclick="closeAttr()"></span></div>' +
+            '<iframe width="380px" height="100%" frameborder="0"  ' +
+            'src="view/form-table.htm" id="form-table"></iframe>' +
+            '</div>';
+          $(viewport).append('<div class="form-table">'+content+'</div>');
+        }else{
+          return;
+        }
+        return !!feature;
+      }
+    });
+  };
+  //关闭属性列表
+  function closeAttr() {
+    $(".form-table").hide();
+  }
+
+</script>
+</html>

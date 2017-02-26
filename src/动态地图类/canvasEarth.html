@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<canvas id="canvas" width="400" height="400"></canvas>
+<script type="application/javascript">
+  var canvas = document.getElementById('canvas');
+  var frame = 0;
+  var ctx = canvas.getContext('2d');
+  var ball = {
+    x: 10,
+    y: 150,
+    radius: 8,
+    color: 'rgba(230,61,35,1)',
+    drawani: function () {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.fillStyle = this.color;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(70, 100);
+      ctx.strokeStyle = "#D40000";
+      ctx.stroke();
+      ctx.closePath();
+
+      ctx.beginPath();
+      ctx.moveTo(70, 100);
+      ctx.lineTo(120, 100);
+      ctx.strokeStyle = "#D40000";
+      ctx.stroke();
+      ctx.closePath();
+
+      ctx.beginPath();
+      ctx.strokeRect(120, 75, 100, 50);
+      ctx.strokeStyle = "#D40000";
+      ctx.fillStyle = "rgba(230,61,35,0.2)";
+      ctx.closePath();
+    }
+  };
+  function anim() {
+    window.requestAnimationFrame(anim);
+    ctx.strokeStyle = "rgba(230,61,35,1)";
+    ctx.beginPath();
+    ctx.arc(10, 150, 12, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.closePath();
+  }
+  anim();
+  ball.drawani();
+</script>
+</body>
+</html>

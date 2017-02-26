@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Custom Tooltips</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../public/map/ol.css">
+  <script type="text/javascript" src="../public/map/ol.js"></script>
+  <script type="text/javascript" src="../public/jquery-2.0.3.js"></script>
+  <link rel="stylesheet" href="../public/bootstrap/css/bootstrap.css">
+  <script type="text/javascript" src="../public/bootstrap/js/bootstrap.js"></script>
+  <!--<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>-->
+  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">-->
+  <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>-->
+  <style>
+    .tooltip-inner {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+<div id="map" class="map"></div>
+<script>
+  var map = new ol.Map({
+    layers: [
+      new ol.layer.Tile({
+        source: new ol.source.OSM()
+      })
+    ],
+    target: 'map',
+    view: new ol.View({
+      center: [-8730000, 5930000],
+      rotation: Math.PI / 5,
+      zoom: 8
+    })
+  });
+
+
+  $('.ol-zoom-in, .ol-zoom-out').tooltip({
+    placement: 'right'
+  });
+  $('.ol-rotate-reset, .ol-attribution button[title]').tooltip({
+    placement: 'left'
+  });
+</script>
+</body>
+</html>

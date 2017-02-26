@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Icon Symbolizer</title>
+  <meta charset="utf-8">
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <link rel="stylesheet" href="../public/map/ol.css">
+  <link rel="stylesheet" href="../public/bootstrap/css/bootstrap.css">
+  <script type="text/javascript" src="../public/map/ol.js"></script>
+  <script type="text/javascript" src="../public/bootstrap/js/bootstrap.js"></script>
+  <style>
+    #map {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+<div id="map" class="map"><div id="popup"></div></div>
+<script>
+  var iconFeature = new ol.Feature({
+    geometry: new ol.geom.Point([10, 0]),
+    name: '哈哈 Island',
+    population: 4000,
+    rainfall: 500
+  });
+
+  var iconStyle = new ol.style.Style({
+    image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+      anchor: [0.5, 46],
+      anchorXUnits: 'fraction',
+      anchorYUnits: 'pixels',
+      src: './map/marker.png'
+    }))
+  });
+
+  iconFeature.setStyle(iconStyle);
+
+  var vectorSource = new ol.source.Vector({
+    features: [iconFeature],
+  });
+
+  var vectorLayer = new ol.layer.Vector({
+    source: vectorSource,
+    wrapX:false
+  });
+
+  var rasterLayer = new ol.layer.Tile({
+    source: new ol.source.TileJSON({
+      url: './json/mapbox.geography-class.json',
+      crossOrigin: ''
+    })
+  });
+
+  var map = new ol.Map({
+    layers: [rasterLayer, vectorLayer],
+    target: document.getElementById('map'),
+    view: new ol.View({
+      center: [10, 10],
+      zoom: 3
+    })
+  });
+
+  var element = document.getElementById('popup');
+
+  var popup = new ol.Overlay({
+    element: element,
+    positioning: 'bottom-center',
+    stopEvent: false,
+    offset: [0, -50]
+  });
+  map.addOverlay(popup);
+
+  // display popup on click
+  map.on('singleclick', function(evt) {
+    debugger;
+    var feature = map.forEachFeatureAtPixel(evt.pixel,
+      function(feature) {
+        return feature;
+      });
+    if (feature) {
+      var coordinates = feature.getGeometry().getCoordinates();
+      console.log(coordinates);
+      popup.setPosition(coordinates);
+      $(element).popover({
+        'placement': 'top',
+        'html': true,
+        'content': feature.get('name')
+      });
+      $(element).popover('show');
+    } else {
+      $(element).popover('destroy');
+    }
+  });
+
+  // change mouse cursor when over marker
+  map.on('pointermove', function(e) {
+    if (e.dragging) {
+      $(element).popover('destroy');
+      return;
+    }
+    var pixel = map.getEventPixel(e.originalEvent);
+    var hit = map.hasFeatureAtPixel(pixel);
+    map.getTarget().style.cursor = hit ? 'pointer' : '';
+  });
+</script>
+</body>
+</html>

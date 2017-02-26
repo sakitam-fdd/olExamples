@@ -1,0 +1,316 @@
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>PPVision 控件测试页面</title>	
+
+		<style type="text/css">
+			#PPVision
+			{
+				z-index:100;
+				width:50%;
+				height:80%;	
+				float:left;
+			}
+		</style>
+	</head>
+
+	<body>
+		<object id="PPVision" classid="CLSID:C2DF135F-24D6-49F7-820A-6CD1B264A60F">
+		</object>
+		<div id="toolbar">
+			<div style="width:50%;margin-top:20px;">
+				<input class="button" type="button" id="fore" value="前进">
+				<input class="button" type="button" id="play" value="播放">
+				<input class="button" type="button" id="stop" value="暂停">
+				<input class="button" type="button" id="back" value="后退">
+				<input class="button" type="button" id="eyeRotateHor" value="旋转视线">
+				<input class="button" type="button" id="eyeFovMax" value="视角放大">
+				<input class="button" type="button" id="eyeFovMin" value="视角缩小">
+				<input class="button" type="button" id="lookAt" value="视线定位">
+			</div>
+			<div style="width:50%;margin-top:20px;">
+				<input class="button" type="button" id="addLayer" value="添加图层">
+				<input class="button" type="button" id="addFeature" value="添加要素">
+				<input class="button" type="button" id="findFeature" value="查找要素">
+				<input class="button" type="button" id="selectFeature" value="选中要素">
+				<input class="button" type="button" id="setTools" value="设置工具">
+				<input class="button" type="button" id="sampleModel" value="采样模式">
+			</div>
+		</div>
+		<div style="width:50%;margin-top:20px;">
+			<div><span>当前位置：</span><span id="eye">0</span></div>
+			<div><span>log：</span><span id="log"></span></div>
+			<div><span>out：</span><span id="out"></span></div>
+		</div>
+	</body>
+
+	<script type="text/javascript" src="js/public/jquery-1.12.3.min.js"></script>
+	<script language="javascript">
+		
+
+		// 图像序列类型
+		var dt_null			=0;
+		var dt_trimble		=1;
+		var dt_imms			=2;
+		var dt_imajbox		=3;
+		var dt_streetview	=4;
+		var dt_topcon		=5;
+		var dt_riegl		=6;
+		var dt_optech		=7;
+
+
+		// 采样模式类型
+		var id_sample_cloud                 =50401;
+		var id_sample_photo                 =50402;
+		var id_sample_3d                    =50403;
+		var id_sample_plane                 =50404;
+		var id_sample_ground                =50405;
+		var id_sample_depth                 =50406;
+
+
+		/**
+		 * response [0 ：成功 1 ：服务检测软件狗信息失败 2 ：服务验证操作失败 3 ]
+		 */
+		function initPPVision() {
+			//设置服务器地址，并验证服务
+			var response = PPVision.setServer("http://211.101.37.253:8099/PPVisionServer.asmx");
+			log_info(response);
+			//打开全景或可测量影像
+			var response = PPVision.locate(dt_imajbox, 115.65485600010538,28.667662000102098,0.0);//php：20903
+			log_info(response);
+		}
+
+		function onFrame(id) {
+			//var response = PPVision.locateByID(dt_imajbox, id);
+			$("#out").text("图片帧数："+id);
+		}
+
+		function eyeRotateHor(){
+			PPVision.eyeRotateHor(90);
+		}
+
+		function log_info(response) {
+			switch (response) {
+				case 1:	$("#log").text("locate: busy");	break;
+				case 2:	$("#log").text("locate: type invalidate");	break;
+				case 3:	$("#log").text("locate: null data");	break;
+				case 4:	$("#log").text("locate: change srs, please save your feature");	break;
+				case 5:	$("#log").text("locate: no license");	break;
+				default:$("#log").text(response);	break;
+			}
+		}
+		/**
+		 *	PPVision 响应控件初始化
+		 */
+		function PPVision::onInit(){
+			console.log("响应控件初始化");
+			log_info("响应控件初始化");
+		}
+
+		/**
+		 *	PPVision 响应设置当前工具
+		 */
+		function PPVision::onTool(cid){
+			log_info("响应设置当前工具:"+cid);
+		}
+
+		/**
+		 *	PPVision 响应设置当前采样模式
+		 */
+		function PPVision::onSampleMode(mode){
+			log_info("响应设置当前采样模式:"+mode);
+		}
+
+		/**
+		 *	PPVision 响应要素创建成功
+		 */
+		function PPVision::onFeatureCreate(def){
+			log_info("响应设置当前采样模式:"+def);
+			//var fe = JSON.parse(def);//浏览器内置对象
+		}
+
+		/**
+		 *	PPVision 响应要素选中
+		 */
+		function PPVision::onFeatureSelect(handle, id){
+			console.log("响应要素选中...........");
+			console.log(id);
+		}
+
+		/**
+		 *	PPVision 响应要素删除
+		 */
+		function PPVision::onFeatureRemove(handle, id){
+			//响应要素删除
+			console.log(id);
+		}
+
+		/**
+		 *	PPVision 响应历史对比
+		 */
+		function PPVision::onHistory(id){
+
+		}
+
+		/**
+		 *	PPVision 响应测量位置坐标
+		 */
+		function PPVision::onMeasure(def){
+			console.log("响应测量位置坐标:"+def);
+		}
+
+		/**
+		 *	PPVision 响应视点移动
+		 */
+		function PPVision::onPosition(lon,lat,alt){
+			$("#eye").text("(" + lon + "," + lat + "," +alt + ")");
+		}
+
+
+		/**
+		 *	PPVision 响应视角改变
+		 */
+		function PPVision::onHeading(heading,fovx){
+			console.log("响应视角改变Head:"+fovx);
+		}
+
+		/**
+		 *	PPVision 响应视角改变
+		 */
+		function PPVision::onEye(dirx,diry,dirz,fovx){
+			console.log("响应视角改变Eye:"+fovx);
+		}
+
+		/**
+		 *	PPVision 响应照片改变
+		 */
+		function PPVision::onFrame(fid){
+			onFrame(fid);
+		}
+
+
+
+		/**
+		 *	PPVision 响应控件内部输出信息
+		 */
+		function PPVision::onOut(str){
+			console.error(str) ;
+		}
+		
+	</script>	
+	
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			initPPVision();
+		});
+
+		$("#play").click(function () {
+			PPVision.play();
+		});
+
+		$("#stop").click(function () {
+			PPVision.stop();
+		});
+
+		$("#fore").click(function () {
+			var fid = PPVision.getFrame();
+			PPVision.locateByID(dt_imajbox, fid+1);
+		});
+
+		$("#back").click(function () {
+			var fid = PPVision.getFrame();
+			PPVision.locateByID(dt_imajbox, fid-1);
+		});
+
+		$("#eyeRotateHor").click(function () {
+			PPVision.eyeRotateHor(90);
+		});
+
+		$("#eyeFovMax").click(function () {
+			PPVision.eyeFov(0.5);
+		});
+
+		$("#eyeFovMin").click(function () {
+			PPVision.eyeFov(2);
+		});
+
+		$("#lookAt").click(function () {
+			PPVision.lookAt(115.65485600010538,28.667662000102098,0.0);
+		});
+
+		$("#addLayer").click(function () {
+			var layer ={
+				name:"LampPole", //图层名称
+				type:"Point",
+				color:"0,0,255,255",
+				size:15,
+				icon:{
+					size:[48,48],
+					offset:[0,24],
+					url:"icon/marker.png"
+				}
+			}
+			PPVision.addLayer(layer);
+		});
+
+		$("#addFeature").click(function () {
+			var layer ={
+				name:"LampPole", //图层名称
+				type:"Point",
+				color:"0,0,255,255",
+				size:15,
+				icon:{
+					size:[48,48],
+					offset:[0,24],
+					url:"icon/marker.png"
+				}
+			}
+			var baseLayer = PPVision.addLayer(layer);
+			var jsonfeature = {
+				"type":"Feature",
+				"properties":{
+					"fid":1234,
+					"name":"灯杆",
+					"color":"0,0,255,255",
+					"size":15,
+					"icon":{
+						"size":[48,48],
+						"offset":[0,24],
+						"url":"icon/marker.png"
+					}
+				},
+				"geometry":{
+					"type":"Point",
+					"coordinates":[115.65485600010538,28.667662000102098,0.0]
+				}
+			};
+			var feature = JSON.stringify(jsonfeature);
+			var response = PPVision.addFeature(baseLayer,feature);
+			log_info(response);
+			console.log("添加要素...")
+		});
+
+		$("#findFeature").click(function () {
+			var feature = PPVision.findFeatureByID(1234);
+			console.log("查找要素："+feature);
+			log_info(feature);
+		});
+
+		$("#selectFeature").click(function () {
+			var findfeature = PPVision.findFeatureByID(1234);
+			PPVision.selectFeature(findfeature);
+		});
+
+		$("#setTools").click(function () {
+			PPVision.setTool(40301);
+		});
+
+		$("#sampleMode").click(function () {
+			PPVision.setSampleMode(50404);
+		});
+
+
+	</script>
+
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>接入百度地图</title>
+    <link rel="stylesheet" href="../public/map/ol.css">
+    <script type="text/javascript" src="../public/map/ol.js"></script>
+    <script type="text/javascript" src="../public/jquery-2.0.3.js"></script>
+</head>
+<body>
+<div id="map" class="map"></div>
+<script>
+  //百度地图
+  var map = null;
+  var resolutions = [];
+  var tileSize = 256;
+  //投影
+  var projection = new ol.proj.get("EPSG:3857");
+  for ( var i = 0; i < 19; i++) {
+    resolutions[i] = Math.pow(2, 18 - i);
+  }
+  var projectionExtent = projection.getExtent();
+
+  var tilegrid = new ol.tilegrid.TileGrid({
+    origin : [ -1657, 26456 ],
+    resolutions : resolutions
+  });
+
+  //地图请求的资源，获取远程数据图层
+  var tilesource = new ol.source.TileImage({
+    projection : projection,
+    tileGrid : tilegrid,
+    tileUrlFunction : function(xyz, obj1, obj2) {
+      if (!xyz) {
+        return "";
+      }
+      z = xyz[0];
+      x = xyz[1];
+      y = xyz[2];
+
+      if (x < 0) {
+        x = "M" + (-x);
+      }
+      if (y < 0) {
+        y = "M" + (-y);
+      }
+      return "http://online3.map.bdimg.com/tile/?qt=tile&x=" + x+ "&y=" + y + "&z=" + z+ "&styles=pl&udt=20141119&scaler=1";
+    }
+  });
+  var source = new ol.source.Vector();
+  var vector = new ol.layer.Vector({
+    source: source,
+    style: new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'rgba(255, 255, 255, 0.2)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: '#ffcc33',
+        width: 2
+      }),
+      image: new ol.style.Circle({
+        radius: 7,
+        fill: new ol.style.Fill({
+          color: '#ffcc33'
+        })
+      })
+    })
+  });
+
+
+
+  var draw;
+  //当前功能
+  var sketch;
+  //工具提示的帮助元素
+  var helpTooltipElement;
+  //叠加显示帮助消息.
+  var helpTooltip;
+  //测量工具提示的元素
+  var measureTooltipElement;
+  //测量的长度，面积
+  var measureTooltip;
+  //消息显示,当用户画一个多边形
+  var continuePolygonMsg = '点击开始测面积';
+  //消息显示,当用户画一条线.
+  var continueLineMsg = '点击开始测距离';
+
+
+
+  /**
+   * Handle pointer move.
+   * @param {ol.MapBrowserEvent} evt
+   */
+  var pointerMoveHandler = function(evt) {
+    if (evt.dragging) {
+      return;
+    }
+    /** @type {string} */
+    var helpMsg = '点击开始测量';
+    /** @type {ol.Coordinate|undefined} */
+    var tooltipCoord = evt.coordinate;
+
+    if (sketch) {
+      var output;
+      var geom = (sketch.getGeometry());
+      if (geom instanceof ol.geom.Polygon) {
+        output = formatArea((geom));
+        helpMsg = continuePolygonMsg;
+        tooltipCoord = geom.getInteriorPoint().getCoordinates();
+      } else if (geom instanceof ol.geom.LineString) {
+        output = formatLength((geom));
+        helpMsg = continueLineMsg;
+        tooltipCoord = geom.getLastCoordinate();
+      }
+      measureTooltipElement.innerHTML = output;
+      measureTooltip.setPosition(tooltipCoord);
+    }
+
+    helpTooltipElement.innerHTML = helpMsg;
+    helpTooltip.setPosition(evt.coordinate);
+  };
+
+
+
+  /*   var map = new ol.Map({
+   layers: [raster, vector],
+   target: 'map',
+   view: new ol.View({
+   center: [-11000000, 4600000],
+   zoom: 15
+   })
+   });  */
+
+  map = new ol.Map({
+    view : new ol.View({
+      center : [12959773, 4853101],
+      zoom : 12,
+      minZoom : 5,
+      maxZoom : 18
+    }),
+    controls : [
+      new ol.control.FullScreen({
+        tipLabel : '全屏'
+      }) ],
+
+    //图层
+    layers:[
+      //瓦片
+      new ol.layer.Tile({
+        extent: projectionExtent,
+        source: tilesource
+      })],
+    target : "map"
+
+  });
+  map.addControl(new ol.control.Zoom());
+  map.addControl(new ol.control.ZoomSlider());
+  map.addControl(new ol.control.ScaleLine());
+
+
+  var draw;
+  function addInteraction(type) {
+    map.on('pointermove', pointerMoveHandler);
+    indexclear();
+    draw = new ol.interaction.Draw({
+      source: source/* tilesource */,
+      type:(type),
+      style: new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: 'rgba(255, 255, 255, 0.2)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: 'rgba(0, 0, 0, 0.5)',
+          lineDash: [10, 10],
+          width: 2
+        }),
+        image: new ol.style.Circle({
+          radius: 5,
+          stroke: new ol.style.Stroke({
+            color: 'rgba(0, 0, 0, 0.7)'
+          }),
+          fill: new ol.style.Fill({
+            color: 'rgba(255, 255, 255, 0.2)'
+          })
+        })
+      })
+    });
+    map.addInteraction(draw);
+
+    createMeasureTooltip();
+    createHelpTooltip();
+
+    draw.on('drawstart',
+      function(evt) {
+        // set sketch
+        sketch = evt.feature;
+      }, this);
+
+    draw.on('drawend',
+      function(evt) {
+        measureTooltipElement.className = 'tooltip tooltip-static';
+        measureTooltipElement.id='tooltip-static';
+        measureTooltip.setOffset([0, -7]);
+        sketch = null;
+        measureTooltipElement = null;
+        createMeasureTooltip();
+      }, this);
+  }
+
+
+
+  /**
+   * Creates a new help tooltip
+   */
+  function createHelpTooltip() {
+    if (helpTooltipElement) {
+      helpTooltipElement.parentNode.removeChild(helpTooltipElement);
+    }
+    helpTooltipElement = document.createElement('div');
+    measureTooltipElement.id='tooltip';
+    helpTooltipElement.className = 'tooltip';
+    helpTooltip = new ol.Overlay({
+      element: helpTooltipElement,
+      offset: [15, 0],
+      positioning: 'center-left'
+    });
+    map.addOverlay(helpTooltip);
+  }
+
+
+
+  function createMeasureTooltip() {
+    if (measureTooltipElement) {
+      measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+    }
+    measureTooltipElement = document.createElement('div');
+    measureTooltipElement.id='tooltip-measure';
+    measureTooltipElement.className = 'tooltip tooltip-measure';
+    measureTooltip = new ol.Overlay({
+      element: measureTooltipElement,
+      offset: [0, -15],
+      positioning: 'bottom-center'
+    });
+    map.addOverlay(measureTooltip);
+  }
+
+
+
+  /**
+   *清空intercation交互控件
+   *清空所有Map上的覆盖物
+   */
+  function  indexclear() {
+    alert("清除当前状态");
+    map.removeInteraction(draw);
+    //清空所有Map上的覆盖物
+    map.getOverlays().clear();
+    //清空鼠标移动事件pointermove
+  };
+
+  /**
+   * format length output
+   * @param {ol.geom.LineString} line
+   * @return {string}
+   */
+  var formatLength = function(line) {
+    var length;
+    length = Math.round(line.getLength() * 100) / 100;
+
+    var output;
+    if (length > 100) {
+      output = (Math.round(length / 1000 * 100) / 100) +
+        ' ' + 'km';
+    } else {
+      output = (Math.round(length * 100) / 100) +
+        ' ' + 'm';
+    }
+    return output;
+  };
+
+
+  /**
+   * format length output
+   * @param {ol.geom.Polygon} polygon
+   * @return {string}
+   */
+  var formatArea = function(polygon) {
+    var area;
+
+    area = polygon.getArea();
+
+    var output;
+    if (area > 10000) {
+      output = (Math.round(area / 1000000 * 100) / 100) +
+        ' ' + 'km<sup>2</sup>';
+    } else {
+      output = (Math.round(area * 100) / 100) +
+        ' ' + 'm<sup>2</sup>';
+    }
+    return output;
+  };
+  //窗口变化更新地图
+  $(window).resizeend({
+    delay: 50
+  }, function () {
+    map.updateSize();//当页面变化刷新地图
+  });
+</script>
+</body>
+</html>

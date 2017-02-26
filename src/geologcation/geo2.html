@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			#message{
+				font-size: 30px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="message"></div>
+		<script type="text/javascript">
+		var oMsg = document.getElementById("message");
+		var time = null;
+			if(navigator.geolocation){
+				time = navigator.geolocation.watchPosition(function(position){
+					oMsg.innerHTML = "经度："+position.coords.longitude+"<br>"
+					+"纬度："+position.coords.latitude+"<br>"
+					+"精确度："+position.coords.accuracy+"<br>"
+					+"海拔："+position.coords.altitude+"<br>"
+					+"海拔准确度："+position.coords.altitudeAccuracy+"<br>"
+					+"行进方向："+position.coords.heading+"<br>"
+					+"速度："+position.coords.speed+"<br>"
+					+"时间戳："+new Date(position.timestamp);
+				},function(error){
+					navigator.geolocation.clearWatch(time);
+					switch(error.code){
+						case(0):oMsg.innerHTML = "未知错误！请重试！";break;
+						case(1):oMsg.innerHTML = "访问位置信息被拒绝！";break;
+						case(2):oMsg.innerHTML = "获取用户信息被拒绝！";break;
+						case(3):oMsg.innerHTML = "获取位置信息超时，请重试！";break;
+					}
+				},{
+					enableHighAccuracy:true,
+					timeout:3000,
+					maximumAge:1000*30,
+					frequency:1000
+				});
+			}else{
+				oMsg.innerHTML = "您的设备不支持定位";
+			}
+		</script>
+	</body>
+</html>

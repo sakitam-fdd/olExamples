@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>工具控件类</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!--引入bootstrap，jQuery，ol3ku-->
+    <link rel="stylesheet" href="../hdsx/public/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../hdsx/public/map/ol.css">
+    <script type="text/javascript" src="../hdsx/public/jquery-2.0.3.js"></script>
+    <script type="text/javascript" src="../hdsx/public/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../hdsx/public/map/ol.js"></script>
+    <style type="text/css">
+      .container{
+        width: 100%;
+        margin-top: 20px;
+      }
+      .container .container{
+        width: 480px;
+        margin: 0 auto;
+      }
+      .map{
+        width: 100%; height: 640px;
+        margin: 10px auto;
+        border: 1px solid #2e2e2e;
+      }
+      .ol-ZoomSlider {
+        position: absolute;
+        background : transparent;
+        top        : 3em;
+        height     : 194px;
+      }
+      .ol-scale-line{
+        position: absolute;
+        background-color: transparent;
+        bottom: 3em;
+        left: 20px;
+      }
+    </style>
+</head>
+<body>
+<div class="container">
+  <div class="container">
+    <button type="button" class="btn btn-primary" id="btn1">放大</button>
+    <button type="button" class="btn btn-primary" id="btn2">缩小</button>
+    <button type="button" class="btn btn-primary" id="btn3">打印</button>
+  </div>
+  <div id="map" class="map"></div>
+</div>
+<script type="text/javascript">
+  var layers = [
+    new ol.layer.Tile({
+      source: new ol.source.OSM()
+    })
+  ];
+  var map = new ol.Map({
+    controls: ol.control.defaults()
+      .extend([
+        new ol.control.ScaleLine({//缩放条的设置：'degrees', 'imperial', 'nautical', 'metric', 'us'
+          units: 'metric'
+        })
+      ]),
+      layers:layers,
+      target:'map',
+      view : new ol.View({
+//        projection:'EPSG:4326',
+        center:[0, 0],
+        zoom:2,
+        maxZoom:8
+    })
+  });
+  var zoomslider = new ol.control.ZoomSlider();
+  map.addControl(zoomslider);
+  $("#btn1").click(function () {//放大
+    var zoom = map.getView().getZoom();
+    map.getView().setZoom(zoom + 1);
+  });
+  $("#btn2").click(function () {//缩小
+    var zoom = map.getView().getZoom();
+    map.getView().setZoom(zoom - 1);
+  });
+  $("#btn3").click(function () {//打印
+    ol.util.print();
+  });
+</script>
+</body>
+</html>

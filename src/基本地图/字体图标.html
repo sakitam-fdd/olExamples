@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>接入百度地图</title>
+  <link rel="stylesheet" href="../public/map/ol.css">
+  <script type="text/javascript" src="../public/map/ol.js"></script>
+  <script type="text/javascript" src="../public/jquery-2.0.3.js"></script>
+  <style type="text/css">
+    .cssmarker-pin {
+      width: 20px;
+      height: 20px;
+      -webkit-border-radius: 50% 50% 50% 0;
+      border-radius: 50% 50% 50% 0;
+      position: relative;
+      -webkit-transform: rotate(-45deg);
+      -moz-transform: rotate(-45deg);
+      -o-transform: rotate(-45deg);
+      -ms-transform: rotate(-45deg);
+      transform: rotate(-45deg);
+      z-index:2;
+    }
+    .cssmarker-pin > span {
+      color:white;
+      position: absolute;
+      transform: rotate(45deg);
+      text-align:center;
+      margin-top:7px;
+      width:100%;
+    }
+  </style>
+</head>
+<body>
+<div id="map" class="map"></div>
+<script>
+  var map = new ol.Map({
+    layers: [
+      new ol.layer.Tile({
+        source: new ol.source.OSM()
+      })
+    ],
+    target: 'map',
+    view: new ol.View({
+      center: [0, 0],
+      zoom: 2
+    })
+  });
+  function addMarker(color,text,iconclass, coordinate) {
+    var marker = document.createElement('div');
+    var pin = document.createElement('div');
+    pin.className = "cssmarker-pin";
+    pin.style.backgroundColor = color;
+    var icon = document.createElement('span');
+    icon.innerHTML = "<i class='" + iconclass + "'></i>";
+    pin.appendChild(icon);
+    marker.appendChild(pin);
+    marker = new ol.Overlay({
+      id: "012",
+      element: marker,
+      position: ol.proj.transform(coordinate, 'EPSG:4326', 'EPSG:3857'),
+      positioning: 'center-center'
+    });
+    map.addOverlay(marker);
+    pin.onclick = function(){
+      content.innerHTML = text;
+      popup.setPosition(ol.proj.transform(coordinate, 'EPSG:4326', 'EPSG:3857'));
+    };
+  }
+  addMarker("#57ab96","Meeting Area","fa fa-calendar",[32.775752,39.896580]);
+  console.log(map.getOverlayById("012"));
+  console.log(map.getOverlayById("012").getProperties());
+</script>
+</body>
+</html>
