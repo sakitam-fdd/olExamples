@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="../../public/openlayer/ol.css">
+</head>
+<body>
+<div id="maps"></div>
+<script type="text/javascript" src="../../public/openlayer/ol.js"></script>
+<script type="application/ecmascript">
+  let map = new ol.Map({
+    layers: [
+      new ol.layer.Tile({
+        source: new ol.source.OSM()
+      })
+    ],
+    target: 'maps',
+    view: new ol.View({
+      center: [0, 0],
+      zoom: 2
+    }),
+  });
+  map.on('click', event => {
+    console.log(event.coordinate)
+  });
+
+  let newLayer = new ol.layer.Vector({
+    layerName: 'test',
+    source: new ol.source.Vector({
+      wrapX: false
+    }),
+    style: function (feature) {
+      return new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: 'rgba(67, 110, 238, 0.4)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: '#4781d9',
+          width: 2
+        }),
+        image: new ol.style.Circle({
+          radius: 7,
+          fill: new ol.style.Fill({
+            color: '#ffcc33'
+          })
+        }),
+        text: ol.style.Text({
+          text: '1',
+          fill: new ol.style.Fill({
+            color: '#000'
+          })
+        })
+      })
+    }
+  });
+  map.addLayer(newLayer)
+
+  let geometrys = new ol.geom.MultiPoint([[12733797.416084088, 4598451.621636203], [12587038.32177655, 3267835.8332478544]])
+
+  let features = new ol.Feature({
+    geometry: geometrys,
+    layout: 'XY'
+  })
+  newLayer.getSource().addFeature(features)
+
+  map.getView().on('change:resolution', event => {
+    console.log(map.getView().getZoom())
+  })
+
+  map.on("click", event => {
+    let feature = map.forEachFeatureAtPixel(event.pixel, feature => {
+      return feature;
+    });
+    let style = new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'rgba(67, 110, 238, 0.4)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: '#4781d9',
+        width: 2
+      }),
+      image: new ol.style.Circle({
+        radius: 7,
+        fill: new ol.style.Fill({
+          color: '#2387c0'
+        })
+      })
+    })
+    if (feature) {
+      feature.setStyle(style);
+      console.log(feature)
+    } else {
+
+    }
+  });
+</script>
+</body>
+</html>
