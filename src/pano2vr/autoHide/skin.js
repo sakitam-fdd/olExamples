@@ -14,7 +14,7 @@ function pano2vrSkin(player,base) {
 	this.divSkin=player.divSkin;
 	this.ggUserdata=me.player.userdata;
 	this.lastSize={ w: -1,h: -1 };
-	var basePath="";
+	var basePath="../public/";
 	// auto detect base path
 	if (base=='?') {
 		var scripts = document.getElementsByTagName('script');
