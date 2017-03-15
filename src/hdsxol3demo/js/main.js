@@ -36,7 +36,7 @@ var appConfig = {
     getImgURL: "img/map/dingwei.png"
   }
 }
-var projection = ol.proj.get("EPSG:4326");
+var projection = ol.proj.get("EPSG:3857");
 // projection.setExtent(appConfig.mapConfig.extent);
 var a = ol.proj.fromLonLat(appConfig.mapConfig.center, projection);//从经度/纬度坐标转换到一个不同的投影,pro:目标投射
 var view = new ol.View({
@@ -101,11 +101,19 @@ baseLayer.push(
     layerName: "baidumap",
   })
 )
+var gaodeBase = 'http://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={x}y={y}&z={z}';
+// var gaodeBase = 'http://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}';
 /*加载高德地图*/
 baseLayer.push(
   new ol.layer.Tile({
     source: new ol.source.XYZ({
-      url: 'http://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x=${x}&y=${y}&z=${z}'
+      projection: 'EPSG:3857',
+      tileUrlFunction: function (tileCoord, pixelRatio, proj) {
+        var _url = gaodeBase.replace('{z}', (tileCoord[0]).toString())
+          .replace('{x}', tileCoord[1].toString())
+          .replace('{y}', (-tileCoord[2] - 1).toString());
+        return _url;
+      }
     }),
     visible:false,
     layerName: "gaode",

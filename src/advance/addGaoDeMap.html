@@ -1,0 +1,70 @@
+<html>
+<head>
+  <title>加载高德地图</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="../../public/bootstrap/css/bootstrap.css">
+  <link rel="stylesheet" href="../../public/openlayer/ol.css">
+  <script type="text/javascript" src="../../public/jquery/jquery.js"></script>
+  <script type="text/javascript" src="../../public/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../../public/openlayer/ol.js"></script>
+</head>
+
+<body>
+<div id="map" style="width:100%;"></div>
+<script>
+  var gaodeImagesUrl = 'http://webst03.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}';
+  var gaodeAnnotionUrl = 'http://webst01.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}';
+  var gaodeLineUrl = 'http://wprd02.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=8&ltype=11';
+  var gaodeImages = new ol.layer.Tile({
+    title: "高德卫星影像",
+    source: new ol.source.XYZ({
+      projection: 'EPSG:102100',
+      tileUrlFunction: function (tileCoord, pixelRatio, proj) {
+        var _url = gaodeImagesUrl.replace('{z}', (tileCoord[0]).toString())
+          .replace('{x}', tileCoord[1].toString())
+          .replace('{y}', (-tileCoord[2] - 1).toString());
+        return _url;
+      }
+    })
+  });
+  // 创建地图
+  var map = new ol.Map({
+    layers: [gaodeImages],
+    view: new ol.View({
+      center: [0, 0],
+      zoom: 2,
+      projection: 'EPSG:102100'
+    }),
+    target: "map"
+  });
+
+  var gaodeLine = new ol.layer.Tile({
+    title: "高德路网",
+    source: new ol.source.XYZ({
+      projection: 'EPSG:3857',
+      tileUrlFunction: function (tileCoord, pixelRatio, proj) {
+        var _url = gaodeLineUrl.replace('{z}', (tileCoord[0]).toString())
+          .replace('{x}', tileCoord[1].toString())
+          .replace('{y}', (-tileCoord[2] - 1).toString());
+        return _url;
+      }
+    })
+  });
+  var gaodeAnnotation = new ol.layer.Tile({
+    title: "高德标注",
+    source: new ol.source.XYZ({
+      projection: 'EPSG:102100',
+      tileUrlFunction: function (tileCoord, pixelRatio, proj) {
+        var _url = gaodeAnnotionUrl.replace('{z}', (tileCoord[0]).toString())
+          .replace('{x}', tileCoord[1].toString())
+          .replace('{y}', (-tileCoord[2] - 1).toString());
+        return _url;
+      }
+    })
+  });
+  map.addLayer(gaodeAnnotation);
+//  map.addLayer(gaodeLine);
+</script>
+</body>
+
+</html>
