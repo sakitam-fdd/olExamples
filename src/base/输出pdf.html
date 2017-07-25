@@ -1,145 +1,145 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Export PDF example</title>
-    <link rel="stylesheet" href="../public/map/ol.css">
-    <script type="text/javascript" src="../public/map/ol.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.2.61/jspdf.min.js"></script>
-    <style>
-        .map {
-            max-width: 566px;
-        }
-    </style>
+  <title>Export PDF example</title>
+  <link rel="stylesheet" href="../../node_modules/openlayers/dist/ol.css">
+  <script type="text/javascript" src="../../node_modules/openlayers/dist/ol.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.2.61/jspdf.min.js"></script>
+  <style>
+    .map {
+      max-width: 566px;
+    }
+  </style>
 </head>
 <body>
 <div class="row-fluid">
-    <div class="span12">
-        <div id="map" class="map"></div>
-    </div>
+  <div class="span12">
+    <div id="map" class="map"></div>
+  </div>
 </div>
 <form class="form">
-    <label>Page size </label>
-    <select id="format">
-        <option value="a0">A0 (slow)</option>
-        <option value="a1">A1</option>
-        <option value="a2">A2</option>
-        <option value="a3">A3</option>
-        <option value="a4" selected>A4</option>
-        <option value="a5">A5 (fast)</option>
-    </select>
-    <label>Resolution </label>
-    <select id="resolution">
-        <option value="72">72 dpi (fast)</option>
-        <option value="150">150 dpi</option>
-        <option value="300">300 dpi (slow)</option>
-    </select>
+  <label>Page size </label>
+  <select id="format">
+    <option value="a0">A0 (slow)</option>
+    <option value="a1">A1</option>
+    <option value="a2">A2</option>
+    <option value="a3">A3</option>
+    <option value="a4" selected>A4</option>
+    <option value="a5">A5 (fast)</option>
+  </select>
+  <label>Resolution </label>
+  <select id="resolution">
+    <option value="72">72 dpi (fast)</option>
+    <option value="150">150 dpi</option>
+    <option value="300">300 dpi (slow)</option>
+  </select>
 </form>
 <button id="export-pdf">Export PDF</button>
 <script>
-    //打印方法也可以使用window.print()方法。
-    var raster = new ol.layer.Tile({
-        source: new ol.source.OSM()
-    });
+  //打印方法也可以使用window.print()方法。
+  var raster = new ol.layer.Tile({
+    source: new ol.source.OSM()
+  });
 
-    var format = new ol.format.WKT();
-    var feature = format.readFeature(
-            'POLYGON((10.689697265625 -25.0927734375, 34.595947265625 ' +
-            '-20.1708984375, 38.814697265625 -35.6396484375, 13.502197265625 ' +
-            '-39.1552734375, 10.689697265625 -25.0927734375))');
-    feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
+  var format = new ol.format.WKT();
+  var feature = format.readFeature(
+    'POLYGON((10.689697265625 -25.0927734375, 34.595947265625 ' +
+    '-20.1708984375, 38.814697265625 -35.6396484375, 13.502197265625 ' +
+    '-39.1552734375, 10.689697265625 -25.0927734375))');
+  feature.getGeometry().transform('EPSG:4326', 'EPSG:3857');
 
-    var vector = new ol.layer.Vector({
-        source: new ol.source.Vector({
-            features: [feature]
-        })
-    });
-
-
-    var map = new ol.Map({
-        layers: [raster, vector],
-        target: 'map',
-        controls: ol.control.defaults({
-            attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
-                collapsible: false
-            })
-        }),
-        view: new ol.View({
-            center: [0, 0],
-            zoom: 2
-        })
-    });
+  var vector = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      features: [feature]
+    })
+  });
 
 
-    var dims = {
-        a0: [1189, 841],
-        a1: [841, 594],
-        a2: [594, 420],
-        a3: [420, 297],
-        a4: [297, 210],
-        a5: [210, 148]
+  var map = new ol.Map({
+    layers: [raster, vector],
+    target: 'map',
+    controls: ol.control.defaults({
+      attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+        collapsible: false
+      })
+    }),
+    view: new ol.View({
+      center: [0, 0],
+      zoom: 2
+    })
+  });
+
+
+  var dims = {
+    a0: [1189, 841],
+    a1: [841, 594],
+    a2: [594, 420],
+    a3: [420, 297],
+    a4: [297, 210],
+    a5: [210, 148]
+  };
+
+  var loading = 0;
+  var loaded = 0;
+
+  var exportButton = document.getElementById('export-pdf');
+
+  exportButton.addEventListener('click', function () {//采用事件监听
+
+    exportButton.disabled = true;//未输出之前让按钮不可点击
+    document.body.style.cursor = 'progress';
+    debugger;
+    var format = document.getElementById('format').value;
+    var resolution = document.getElementById('resolution').value;
+    var dim = dims[format];
+    var width = Math.round(dim[0] * resolution / 25.4);
+    var height = Math.round(dim[1] * resolution / 25.4);
+    var size = /** @type {ol.Size} */ (map.getSize());
+    var extent = map.getView().calculateExtent(size);//计算视图的大小，一般情况下你需要的是整个地图的大小size；
+    //map.getView():得到视图的大小，包含视图信息，例如中心点和分辨率等。
+
+    var source = raster.getSource();//getSource():返回当前地图图层
+
+    var tileLoadStart = function () {
+      ++loading;
     };
 
-    var loading = 0;
-    var loaded = 0;
-
-    var exportButton = document.getElementById('export-pdf');
-
-    exportButton.addEventListener('click', function() {//采用事件监听
-
-        exportButton.disabled = true;//未输出之前让按钮不可点击
-        document.body.style.cursor = 'progress';
-        debugger;
-        var format = document.getElementById('format').value;
-        var resolution = document.getElementById('resolution').value;
-        var dim = dims[format];
-        var width = Math.round(dim[0] * resolution / 25.4);
-        var height = Math.round(dim[1] * resolution / 25.4);
-        var size = /** @type {ol.Size} */ (map.getSize());
-        var extent = map.getView().calculateExtent(size);//计算视图的大小，一般情况下你需要的是整个地图的大小size；
-        //map.getView():得到视图的大小，包含视图信息，例如中心点和分辨率等。
-
-        var source = raster.getSource();//getSource():返回当前地图图层
-
-        var tileLoadStart = function() {
-            ++loading;
-        };
-
-        var tileLoadEnd = function() {
-            ++loaded;
-            if (loading === loaded) {
-                var canvas = this;
-                window.setTimeout(function() {
-                    loading = 0;
-                    loaded = 0;
-                    var data = canvas.toDataURL('image/png');
-                    var pdf = new jsPDF('landscape', undefined, format);
-                    pdf.addImage(data, 'JPEG', 0, 0, dim[0], dim[1]);
-                    pdf.save('map.pdf');
+    var tileLoadEnd = function () {
+      ++loaded;
+      if (loading === loaded) {
+        var canvas = this;
+        window.setTimeout(function () {
+          loading = 0;
+          loaded = 0;
+          var data = canvas.toDataURL('image/png');
+          var pdf = new jsPDF('landscape', undefined, format);
+          pdf.addImage(data, 'JPEG', 0, 0, dim[0], dim[1]);
+          pdf.save('map.pdf');
 //                    var id = document.getElementById('map');
 //                    window.print(id);
-                    source.un('tileloadstart', tileLoadStart);
-                    source.un('tileloadend', tileLoadEnd, canvas);
-                    source.un('tileloaderror', tileLoadEnd, canvas);
-                    map.setSize(size);
-                    map.getView().fit(extent, size);
-                    map.renderSync();
-                    exportButton.disabled = false;
-                    document.body.style.cursor = 'auto';
-                }, 0);
-            }
-        };
+          source.un('tileloadstart', tileLoadStart);
+          source.un('tileloadend', tileLoadEnd, canvas);
+          source.un('tileloaderror', tileLoadEnd, canvas);
+          map.setSize(size);
+          map.getView().fit(extent, size);
+          map.renderSync();
+          exportButton.disabled = false;
+          document.body.style.cursor = 'auto';
+        }, 0);
+      }
+    };
 
-        map.once('postcompose', function(event) {//监听一次特定类型的事件
-            source.on('tileloadstart', tileLoadStart);
-            source.on('tileloadend', tileLoadEnd, event.context.canvas);
-            source.on('tileloaderror', tileLoadEnd, event.context.canvas);
-        });
+    map.once('postcompose', function (event) {//监听一次特定类型的事件
+      source.on('tileloadstart', tileLoadStart);
+      source.on('tileloadend', tileLoadEnd, event.context.canvas);
+      source.on('tileloaderror', tileLoadEnd, event.context.canvas);
+    });
 
-        map.setSize([width, height]);
-        map.getView().fit(extent, /** @type {ol.Size} */ (map.getSize()));
-        map.renderSync();
+    map.setSize([width, height]);
+    map.getView().fit(extent, /** @type {ol.Size} */ (map.getSize()));
+    map.renderSync();
 
-    }, false);
+  }, false);
 </script>
 </body>
 </html>

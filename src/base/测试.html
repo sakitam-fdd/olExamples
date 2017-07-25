@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-  <link rel="stylesheet" href="../public/map/ol.css">
-  <script type="text/javascript" src="../public/map/ol.js"></script>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="../../node_modules/openlayers/dist/ol.css">
+  <script type="text/javascript" src="../../node_modules/openlayers/dist/ol.js"></script>
 </head>
 <body>
 <div id="map" class="map"></div>
@@ -22,7 +22,7 @@
   });
   var HTML;
   map.on('pointermove', pointerMoveHandler);//地图移动事件
-  function pointerMoveHandler(evt) {
+  function pointerMoveHandler (evt) {
     HTML.innerHTML = evt.coordinate;
     console.log(evt.coordinate);
   }

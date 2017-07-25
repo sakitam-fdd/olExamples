@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>地图动画</title>
-  <link rel="stylesheet" href="../public/map/ol.css">
-  <script type="text/javascript" src="../public/map/ol.js"></script>
+  <meta charset="UTF-8">
+  <title>地图动画</title>
+  <link rel="stylesheet" href="../../node_modules/openlayers/dist/ol.css">
+  <script type="text/javascript" src="../../node_modules/openlayers/dist/ol.js"></script>
 </head>
 <body>
 <div id="map" class="map"></div>
@@ -19,7 +19,7 @@
 <button id="spiral-to-madrid">Spiral to Madrid</button>
 <script>
   // from https://github.com/DmitryBaranovskiy/raphael
-  function bounce(t) {
+  function bounce (t) {
     var s = 7.5625, p = 2.75, l;
     if (t < (1 / p)) {
       l = s * t * t;
@@ -41,7 +41,7 @@
   }
 
   // from https://github.com/DmitryBaranovskiy/raphael
-  function elastic(t) {
+  function elastic (t) {
     return Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
   }
 
@@ -78,7 +78,7 @@
   });
 
   var rotateLeft = document.getElementById('rotate-left');
-  rotateLeft.addEventListener('click', function() {
+  rotateLeft.addEventListener('click', function () {
     var rotateLeft = ol.animation.rotate({
       duration: 2000,
       rotation: -4 * Math.PI
@@ -86,7 +86,7 @@
     map.beforeRender(rotateLeft);
   }, false);
   var rotateRight = document.getElementById('rotate-right');
-  rotateRight.addEventListener('click', function() {
+  rotateRight.addEventListener('click', function () {
     var rotateRight = ol.animation.rotate({
       duration: 2000,
       rotation: 4 * Math.PI
@@ -95,7 +95,7 @@
   }, false);
 
   var rotateAroundRome = document.getElementById('rotate-around-rome');
-  rotateAroundRome.addEventListener('click', function() {
+  rotateAroundRome.addEventListener('click', function () {
     var currentRotation = view.getRotation();
     var rotateAroundRome = ol.animation.rotate({
       anchor: rome,
@@ -107,7 +107,7 @@
   }, false);
 
   var panToLondon = document.getElementById('pan-to-london');
-  panToLondon.addEventListener('click', function() {
+  panToLondon.addEventListener('click', function () {
     var pan = ol.animation.pan({
       duration: 2000,
       source: /** @type {ol.Coordinate} */ (view.getCenter())
@@ -117,7 +117,7 @@
   }, false);
 
   var elasticToMoscow = document.getElementById('elastic-to-moscow');
-  elasticToMoscow.addEventListener('click', function() {
+  elasticToMoscow.addEventListener('click', function () {
     var pan = ol.animation.pan({
       duration: 2000,
       easing: elastic,
@@ -128,7 +128,7 @@
   }, false);
 
   var bounceToIstanbul = document.getElementById('bounce-to-istanbul');
-  bounceToIstanbul.addEventListener('click', function() {
+  bounceToIstanbul.addEventListener('click', function () {
     var pan = ol.animation.pan({
       duration: 2000,
       easing: bounce,
@@ -139,7 +139,7 @@
   }, false);
 
   var spinToRome = document.getElementById('spin-to-rome');
-  spinToRome.addEventListener('click', function() {
+  spinToRome.addEventListener('click', function () {
     var duration = 2000;
     var start = +new Date();
     var pan = ol.animation.pan({
@@ -157,7 +157,7 @@
   }, false);
 
   var flyToBern = document.getElementById('fly-to-bern');
-  flyToBern.addEventListener('click', function() {
+  flyToBern.addEventListener('click', function () {
     var duration = 2000;
     var start = +new Date();
     var pan = ol.animation.pan({
@@ -175,7 +175,7 @@
   }, false);
 
   var spiralToMadrid = document.getElementById('spiral-to-madrid');
-  spiralToMadrid.addEventListener('click', function() {
+  spiralToMadrid.addEventListener('click', function () {
     var duration = 2000;
     var start = +new Date();
     var pan = ol.animation.pan({
