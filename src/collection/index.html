@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="renderer" content="webkit">
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>openlayers demo</title>
+  <link rel="stylesheet" href="../../node_modules/normalize.css/normalize.css">
+  <link rel="stylesheet" href="../../node_modules/openlayers/dist/ol.css">
+  <link rel="stylesheet" href="./css/MeasureTool.css">
+  <link rel="stylesheet" href="./css/main.css">
+</head>
+<body>
+<header class="header-content">
+  openlayers基本功能展示（目前最新版本v4.2.0）
+  <a target="_blank" href="http://openlayers.org/en/latest/examples/">更多官方示例</a>
+</header>
+<div class="content-warp clearfix">
+  <nav class="nav-content">
+    <div>
+      <button class="button" data-name="addPoint">添加单个点</button>
+      <button class="button" data-name="addPoints">添加多个点</button>
+      <button class="button" data-name="removePoints">移除点</button>
+    </div>
+    <div>
+      <button class="button" data-name="addLine">添加单线</button>
+      <button class="button" data-name="addLines">添加多条线</button>
+      <button class="button" data-name="removeLines">移除线</button>
+    </div>
+    <div>
+      <button class="button" data-name="addPolygon">添加单面</button>
+      <button class="button" data-name="addPolygons">添加多个面</button>
+      <button class="button" data-name="removePolygons">移除面</button>
+    </div>
+  </nav>
+  <div class="map-content" id="map">
+    <div class="tool-content">
+      <span class="tool-button" data-name="measureLength">测距</span>
+      <span class="tool-button" data-name="measureArea">测面</span>
+      <span class="tool-button" data-name="fullMap">全图</span>
+    </div>
+    <div class="map-change-content">
+      <ul class="mapType-wrapper" id="mapType-wrapper">
+        <li class="mapTypeCard vector" data-name="vector">
+          <span class="title">矢量地图</span>
+        </li>
+        <li class="mapTypeCard earth" data-name="earth">
+          <span class="title">影像地图</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<script src="../../node_modules/openlayers/dist/ol.js"></script>
+<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+<script src="./lib/MeasureTool.js"></script>
+<script src="./main.js"></script>
+<script src="./index.js"></script>
+<script type="text/javascript">
+  initMap('http://111.75.200.54:6080/arcgis/rest/services/JXQG_FOUR/MapServer')
+</script>
+</body>
+</html>

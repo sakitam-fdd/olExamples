@@ -1,0 +1,200 @@
+html, body {
+  height: 100%;
+}
+ul, li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.clearfix {
+  *zoom: 1;
+}
+
+.clearfix:after {
+  visibility: hidden;
+  display: block;
+  font-size: 0;
+  content: " ";
+  clear: both;
+  height: 0;
+}
+
+:focus {
+  outline: none;
+}
+
+a {
+  text-decoration: none;
+  outline: none;
+}
+.header-content {
+  width: calc(100% - 40px);
+  height: 50px;
+  line-height: 50px;
+  background-color: #20a0ff;
+  padding: 0 20px;
+  color: #fff;
+  font-size: 24px
+}
+.content-warp {
+  width: 100%;
+  height: calc(100% - 50px);
+}
+.content-warp .nav-content {
+  width: 150px;
+  height: 100%;
+  float: left;
+  background-color: #2b2f3e;
+  text-align: center;
+}
+.content-warp .map-content {
+  position: relative;
+  float: right;
+  width: calc(100% - 150px);
+  height: 100%;
+}
+/*底图切换*/
+.map-change-content {
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+}
+
+.map-change-content ul {
+  margin: 0px;
+  padding: 0px;
+}
+
+.map-change-content .mapType-wrapper {
+  height: 80px;
+  cursor: pointer;
+  -webkit-transition-property: width, background-color;
+  transition-property: width, background-color;
+  -webkit-transition-duration: .4s;
+  transition-duration: .4s;
+  width: 110px;
+  background-color: rgba(255, 255, 255, 0);
+}
+.map-change-content .mapType-wrapper li {
+  list-style: none;
+}
+.map-change-content .mapType-wrapper li span {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: inline-block;
+  padding: 3px 3px 2px 4px;
+  font-size: 12px;
+  height: 12px;
+  line-height: 12px;
+  color: #FFF;
+  border-top-left-radius: 2px;
+}
+.map-change-content .mapType-wrapper li:hover span {
+  background-color: #3385FF;
+}
+.map-change-content .mapType-wrapper .mapTypeCard {
+  height: 60px;
+  width: 86px;
+  position: absolute;
+  border-radius: 2px;
+  top: 10px;
+  box-sizing: border-box;
+  border: 1px solid rgba(153, 153, 153, .42);
+  background: url('../images/shadow.png') no-repeat 0 0;
+  -webkit-transition-property: right, background-image;
+  transition-property: right, background-image;
+  -webkit-transition-duration: .4s;
+  transition-duration: .4s;
+}
+.map-change-content .mapType-wrapper .vector {
+  z-index: 1;
+  right: 20px;
+  background-image: url('../images/maptype_vector.png');
+}
+.map-change-content .mapType-wrapper .earth {
+  right: 15px;
+  z-index: 3;
+  background-image: url('../images/maptype_earth.png');
+}
+.map-change-content .expand {
+  width: 180px;
+  background-color: #fff;
+  background-color: rgba(255, 255, 255, .8);
+}
+.map-change-content .expand .vector {
+  background-image: url('../images/maptype_vector.png');
+  right: 110px;
+}
+.map-change-content .expand .earth {
+  background-image: url('../images/maptype_earth.png');
+  right: 15px;
+}
+.map-change-content .active {
+  border: 1px solid #3385FF !important;
+}
+.map-change-content .active span {
+  background-color: #3385FF;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 10px;
+  color: #fff;
+  background-color: #449d44;
+  border-color: #398439;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.button:hover {
+  background-color: #398439;
+  border-color: #255625
+}
+/**工具**/
+.tool-content {
+  position: absolute;
+  right: 70px;
+  height: 28px;
+  line-height: 28px;
+  top: 10px;
+  z-index: 1;
+}
+.tool-content .tool-button {
+  display: inline-block;
+  color: #fff;
+  background-color: #449d44;
+  border-color: #398439;
+  padding: 3px 10px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}

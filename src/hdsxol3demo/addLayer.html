@@ -1,45 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>图层叠加</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <!--引入bootstrap，jQuery，ol3ku-->
-    <link rel="stylesheet" href="../hdsx/public/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../hdsx/public/map/ol.css">
-    <script type="text/javascript" src="../hdsx/public/jquery-2.0.3.js"></script>
-    <script type="text/javascript" src="../hdsx/public/bootstrap/js/bootstrap.min.js"></script>
-    <!--<script type="text/javascript" src="../hdsx/public/map/ol.js"></script>-->
-    <script type="text/javascript" src="../hdsx/public/map/ol-debug.js.js"></script>
-    <style type="text/css">
-      .container{
-        width: 100%;
-        margin-top: 20px;
-      }
-      .container .container{
-        width: 740px;
-        margin: 0 auto;
-      }
-      .map{
-        width: 100%; height: 640px;
-        margin: 10px auto;
-        border: 1px solid #2e2e2e;
-        /*position: relative;*/
-      }
-      .ol-ZoomSlider{
-        position: absolute;
-        background : transparent;
-        top        : 3em;
-        height     : 194px;
-      }
-      .ol-scale-line{
-        position: absolute;
-        background-color: transparent;
-        bottom: 3em;
-        left: 20px;
-      }
-    </style>
+  <meta charset="UTF-8">
+  <title>图层叠加</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../node_modules/openlayers/dist/ol.css">
+  <script type="text/javascript" src="../../node_modules/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../../node_modules/openlayers/dist/ol.js"></script>
+  <style type="text/css">
+    .container {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .container .container {
+      width: 740px;
+      margin: 0 auto;
+    }
+
+    .map {
+      width: 100%;
+      height: 640px;
+      margin: 10px auto;
+      border: 1px solid #2e2e2e;
+      /*position: relative;*/
+    }
+
+    .ol-ZoomSlider {
+      position: absolute;
+      background: transparent;
+      top: 3em;
+      height: 194px;
+    }
+
+    .ol-scale-line {
+      position: absolute;
+      background-color: transparent;
+      bottom: 3em;
+      left: 20px;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
@@ -55,10 +58,10 @@
 </div>
 <script type="text/javascript">
   var map;
-  var baseLayer,view;
+  var baseLayer, view;
   var center = [115.92466595234826, 27.428038204473552];//江西省
   var extent = [109.72859368643232, 24.010266905347684, 121.13105988819079, 30.76693489432357];
-  function init() {
+  function init () {
     /*默认显示基本地图*/
     baseLayer = new ol.layer.Tile({
       source: new ol.source.OSM(),
@@ -68,17 +71,17 @@
       extent: extent
     });
     /*view = new ol.View({
-      center:[0, 0],
-      zoom:2,
-      maxZoom:10
-    });*/
+     center:[0, 0],
+     zoom:2,
+     maxZoom:10
+     });*/
     var projection = ol.proj.get("EPSG:4326");
     projection.setExtent(extent);
     view = new ol.View({
       center: ol.proj.fromLonLat(center, projection),//从经度/纬度坐标转换到一个不同的投影,pro:目标投射
       zoom: 2,//目标缩放
       projection: projection,
-      maxZoom:10
+      maxZoom: 10
     })
     /***************创建地图容器****************/
     map = new ol.Map({

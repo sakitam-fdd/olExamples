@@ -1,31 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>底图切换demo</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <!--引入bootstrap，jQuery，ol3ku-->
-    <link rel="stylesheet" href="../hdsx/public/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../hdsx/public/map/ol.css">
-    <script type="text/javascript" src="../hdsx/public/jquery-2.0.3.js"></script>
-    <script type="text/javascript" src="../hdsx/public/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../hdsx/public/map/ol.js"></script>
-    <style type="text/css">
-      .container{
-        width: 100%;
-        margin-top: 20px;
-      }
-      .container .container{
-        width: 480px;
-        margin: 0 auto;
-      }
-      .map{
-        width: 100%; height: 640px;
-        margin: 10px auto;
-        border: 1px solid #2e2e2e;
-      }
-</style>
+  <meta charset="UTF-8">
+  <title>底图切换demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!--引入bootstrap，jQuery，ol3ku-->
+  <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../node_modules/openlayers/dist/ol.css">
+  <script type="text/javascript" src="../../node_modules/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../../node_modules/openlayers/dist/ol.js"></script>
+  <style type="text/css">
+    .container {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .container .container {
+      width: 480px;
+      margin: 0 auto;
+    }
+
+    .map {
+      width: 100%;
+      height: 640px;
+      margin: 10px auto;
+      border: 1px solid #2e2e2e;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
@@ -39,13 +42,13 @@
 </div>
 <script type="text/javascript">
   var map;
-  function init() {
+  function init () {
     /*默认显示基本地图*/
     var baseLayer = [];
     baseLayer.push(
       new ol.layer.Tile({
         source: new ol.source.OSM(),
-        visible:true,
+        visible: true,
         layerName: "base",
       })
     );
@@ -54,45 +57,45 @@
         source: new ol.source.XYZ({
           url: 'http://t3.tianditu.com/DataServer?T=img_w&x={x}&y={y}&l={z}'
         }),
-        visible:false,
+        visible: false,
         layerName: "tianditu",
       })
     )
     /*加载百度地图*/
     var projection = ol.proj.get("EPSG:3857");
     var resolutions = [];
-    for(var i=0; i<19; i++){
-      resolutions[i] = Math.pow(2, 18-i);
+    for (var i = 0; i < 19; i++) {
+      resolutions[i] = Math.pow(2, 18 - i);
     }
-    var tilegrid  = new ol.tilegrid.TileGrid({
-      origin: [0,0],
+    var tilegrid = new ol.tilegrid.TileGrid({
+      origin: [0, 0],
       resolutions: resolutions
     });
 
     var baidu_source = new ol.source.TileImage({
       projection: projection,
       tileGrid: tilegrid,
-      tileUrlFunction: function(tileCoord, pixelRatio, proj){
-        if(!tileCoord){
+      tileUrlFunction: function (tileCoord, pixelRatio, proj) {
+        if (!tileCoord) {
           return "";
         }
         var z = tileCoord[0];
         var x = tileCoord[1];
         var y = tileCoord[2];
 
-        if(x<0){
-          x = "M"+(-x);
+        if (x < 0) {
+          x = "M" + (-x);
         }
-        if(y<0){
-          y = "M"+(-y);
+        if (y < 0) {
+          y = "M" + (-y);
         }
-        return "http://online3.map.bdimg.com/onlinelabel/?qt=tile&x="+x+"&y="+y+"&z="+z+"&styles=pl&udt=20151021&scaler=1&p=1";
+        return "http://online3.map.bdimg.com/onlinelabel/?qt=tile&x=" + x + "&y=" + y + "&z=" + z + "&styles=pl&udt=20151021&scaler=1&p=1";
       }
     });
     baseLayer.push(
       new ol.layer.Tile({
         source: baidu_source,
-        visible:false,
+        visible: false,
         layerName: "baidumap",
       })
     )
@@ -102,7 +105,7 @@
         source: new ol.source.XYZ({
           url: 'http://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x=${x}&y=${y}&z=${z}'
         }),
-        visible:false,
+        visible: false,
         layerName: "gaode",
       })
     )
@@ -124,7 +127,7 @@
       layers: baseLayer,    //必须定义
       view: view
     });
-    function getlayerByName(layername) {
+    function getlayerByName (layername) {
       var targetLayer = null;
       if (map) {
         var layers = map.getLayers();

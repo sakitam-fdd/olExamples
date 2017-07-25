@@ -1,12 +1,12 @@
 <html>
 <head>
   <title>加载离线地图</title>
-  <link rel="stylesheet" href="../../public/openlayer/ol.css">
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="../../node_modules/openlayers/dist/ol.css">
 </head>
-
 <body>
 <div id="map" style="width:100%;"></div>
-<script type="text/javascript" src="../../public/openlayer/ol-debug.js"></script>
+<script type="text/javascript" src="../../node_modules/openlayers/dist/ol.js"></script>
 <script type="text/javascript">
   var center = ol.proj.transform([116.22812005, 39.95740819], 'EPSG:4326', 'EPSG:3857'); //设置地图中心
   //创建地图
@@ -19,7 +19,7 @@
   });
 
   // 添加一个使用离线瓦片地图的层
-  var tileUrl = 'mapTitle/TDT_StandardTiles';
+  var tileUrl = './mapTitle/TDT_StandardTiles';
   var baseLayer = new ol.layer.Tile({
     source: new ol.source.XYZ({
       tileUrlFunction: function (tileCoord) {

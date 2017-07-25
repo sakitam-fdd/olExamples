@@ -1,44 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>ol3底图加载</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <!--引入bootstrap，jQuery，ol3ku-->
-    <link rel="stylesheet" href="../../public/bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="../../public/openlayer/ol.css">
-    <script type="text/javascript" src="../../public/jquery/jquery.js"></script>
-    <script type="text/javascript" src="../../public/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../../public/openlayer/ol.js"></script>
-    <style type="text/css">
-      .container{
-        width: 100%;
-        margin-top: 20px;
-      }
-      .container .container{
-        width: 740px;
-        margin: 0 auto;
-      }
-      .map{
-        width: 100%; height: 640px;
-        margin: 10px auto;
-        border: 1px solid #2e2e2e;
-        position: relative;
-      }
-      .ol-ZoomSlider{
-        position: absolute;
-        background : transparent;
-        top        : 3em;
-        height     : 194px;
-      }
-      .ol-scale-line{
-        position: absolute;
-        background-color: transparent;
-        bottom: 3em;
-        left: 20px;
-      }
-    </style>
+  <meta charset="UTF-8">
+  <title>ol3底图加载</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!--引入bootstrap，jQuery，ol3ku-->
+  <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../node_modules/openlayers/dist/ol.css">
+  <script type="text/javascript" src="../../node_modules/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../../node_modules/openlayers/dist/ol.js"></script>
+  <style type="text/css">
+    .container {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .container .container {
+      width: 740px;
+      margin: 0 auto;
+    }
+
+    .map {
+      width: 100%;
+      height: 640px;
+      margin: 10px auto;
+      border: 1px solid #2e2e2e;
+      position: relative;
+    }
+
+    .ol-ZoomSlider {
+      position: absolute;
+      background: transparent;
+      top: 3em;
+      height: 194px;
+    }
+
+    .ol-scale-line {
+      position: absolute;
+      background-color: transparent;
+      bottom: 3em;
+      left: 20px;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
@@ -55,14 +60,14 @@
 <script type="text/javascript">
   var scaleLineControl = new ol.control.ScaleLine();//创建一个比例尺
   var map;
-  function init() {
+  function init () {
     /*默认显示基本地图*/
     var baseLayer = new ol.layer.Tile({
-        source: new ol.source.OSM(),
-        isBaseLayer: true,//通用基本图层
-        isCurrentBaseLayer: true,//当前通用基本图层
-        layerName: "base",
-      });
+      source: new ol.source.OSM(),
+      isBaseLayer: true,//通用基本图层
+      isCurrentBaseLayer: true,//当前通用基本图层
+      layerName: "base",
+    });
     var view = new ol.View({
       center: [0, 0],
       zoom: 2
@@ -81,7 +86,8 @@
       layers: [baseLayer],    //必须定义
       view: view
     });
-    function getlayerByName(layername) {
+
+    function getlayerByName (layername) {
       var targetLayer = null;
       if (map) {
         var layers = map.getLayers();
@@ -94,6 +100,7 @@
       }
       return targetLayer;
     }
+
     $("#btn2").click(function () {
       map.getLayers().forEach(function (layer) {
         if (layer.get("isBaseLayer")) {
@@ -110,11 +117,11 @@
   setTimeout(function () {
     loadjxmap();
     loadtianditu();
-  },3000);
-  function loadjxmap() {
+  }, 3000);
+  function loadjxmap () {
     /*加载江西地图*/
     var layerTitle = "http://171.34.40.68:6080/arcgis/rest/services/JXMAP_2016/MapServer";//公司江西省地图
-    var center=[115.92466595234826, 27.428038204473552];//江西省
+    var center = [115.92466595234826, 27.428038204473552];//江西省
     $.ajax({
       url: layerTitle + "?f=pjson",
       type: "GET",
@@ -168,10 +175,10 @@
     console.log(map);
     map.addLayer(baseLayer)
   }
-  function loadtianditu() {
+  function loadtianditu () {
     var baseLayer = new ol.layer.Tile({
       title: "天地图路网",
-      layerName:"td",
+      layerName: "td",
       isBaseLayer: false,//通用基本图层
       isCurrentBaseLayer: true,//当前通用基本图层
       source: new ol.source.XYZ({
@@ -180,7 +187,7 @@
     });
     var view = new ol.View({
       center: [0, 0],
-      zoom  : 2
+      zoom: 2
     });
     map.addLayer(baseLayer);
   }

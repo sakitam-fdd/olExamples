@@ -6,15 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <!--引入bootstrap，jQuery，ol3ku-->
-  <link rel="stylesheet" href="../hdsx/public/map/ol.css">
-  <script type="text/javascript" src="../hdsx/public/jquery-2.0.3.js"></script>
-  <script type="text/javascript" src="../hdsx/public/map/ol-debug.js"></script>
+  <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../node_modules/openlayers/dist/ol.css">
+  <script type="text/javascript" src="../../node_modules/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../../node_modules/openlayers/dist/ol.js"></script>
   <style>
-    .tooltip{
+    .tooltip {
       font-family: "微软雅黑", sans-serif;
       font-size: 12px;
-      border: 1px solid rgba(0,0,0,0.5);
-      border-radius:4px;
+      border: 1px solid rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -72,7 +74,7 @@
         source: tileArcGISXYZ,
         extent: fullExtent
       });
-      var center=[115.92466595234826, 27.428038204473552];//江西省
+      var center = [115.92466595234826, 27.428038204473552];//江西省
       var scaleLineControl = new ol.control.ScaleLine();//创建一个比例尺
 
       /***********创建临时图层************/
@@ -110,7 +112,7 @@
           scaleLineControl
         ]),
         interactions: ol.interaction.defaults({doubleClickZoom: false}),
-        layers: [baseLayer,vector],    //必须定义
+        layers: [baseLayer, vector],    //必须定义
         view: new ol.View({
           center: ol.proj.fromLonLat(center, projection),//从经度/纬度坐标转换到一个不同的投影,pro:目标投射
           zoom: 1,//目标缩放
@@ -135,44 +137,45 @@
         });
         linefeature.setStyle(lineStyle);
         vector.getSource().addFeature(linefeature);
-      };
+      }
+      ;
       /*
-      * 创建吸附要素
-      * */
+       * 创建吸附要素
+       * */
       /*var Modify = {
-        init: function() {
-          this.select = new ol.interaction.Select();//选择交互
-          map.addInteraction(this.select);
+       init: function() {
+       this.select = new ol.interaction.Select();//选择交互
+       map.addInteraction(this.select);
 
-          this.modify = new ol.interaction.Modify({//修改交互
-            features: this.select.getFeatures()
-          });
-          map.addInteraction(this.modify);
+       this.modify = new ol.interaction.Modify({//修改交互
+       features: this.select.getFeatures()
+       });
+       map.addInteraction(this.modify);
 
-          this.setEvents();
-        },
-        setEvents: function() {
-          var selectedFeatures = this.select.getFeatures();
+       this.setEvents();
+       },
+       setEvents: function() {
+       var selectedFeatures = this.select.getFeatures();
 
-          this.select.on('change:active', function() {
-            selectedFeatures.forEach(selectedFeatures.remove, selectedFeatures);
-          });
-        },
-        setActive: function(active) {
-          this.select.setActive(active);
-          this.modify.setActive(active);
-        }
-      };
-      Modify.init();
-      var snap = new ol.interaction.Snap({
-        pixelTolerance: 40,//捕捉发生的距离，像素数
-        source: vector.getSource()
-      });
-      map.addInteraction(snap);*/
+       this.select.on('change:active', function() {
+       selectedFeatures.forEach(selectedFeatures.remove, selectedFeatures);
+       });
+       },
+       setActive: function(active) {
+       this.select.setActive(active);
+       this.modify.setActive(active);
+       }
+       };
+       Modify.init();
+       var snap = new ol.interaction.Snap({
+       pixelTolerance: 40,//捕捉发生的距离，像素数
+       source: vector.getSource()
+       });
+       map.addInteraction(snap);*/
       //
       var point = null;
       var line = null;
-      var displaySnap = function(coordinate) {
+      var displaySnap = function (coordinate) {
         var closestFeature = vector.getSource().getClosestFeatureToCoordinate(coordinate);//得到离坐标最近的层源
         var info = document.getElementById('info');
         if (closestFeature === null) {
@@ -189,7 +192,7 @@
           }
           var date = new Date(closestPoint[2] * 1000);
           /*info.innerHTML =
-            closestFeature.get('PLT') + ' (' + date.toUTCString() + ')';*/
+           closestFeature.get('PLT') + ' (' + date.toUTCString() + ')';*/
           var coordinates = [coordinate, [closestPoint[0], closestPoint[1]]];
           if (line === null) {
             line = new ol.geom.LineString(coordinates);
@@ -200,7 +203,7 @@
         map.render();
       };
 
-      map.on('pointermove', function(evt) {
+      map.on('pointermove', function (evt) {
         if (evt.dragging) {
           return;
         }
@@ -219,7 +222,7 @@
           stroke: stroke
         })
       });
-      map.on('postcompose', function(evt) {
+      map.on('postcompose', function (evt) {
         var vectorContext = evt.vectorContext;
         vectorContext.setStyle(style);
         if (point !== null) {
